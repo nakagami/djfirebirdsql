@@ -39,6 +39,18 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
             indexes = self.connection.introspection._get_field_indexes(cursor, model._meta.db_table, field.column)
         return indexes
 
+    def alter_field(self, model, old_field, new_field, strict=False):
+        old_db_params = old_field.db_parameters(connection=self.connection)
+        old_type = old_db_params['type']
+        new_db_params = new_field.db_parameters(connection=self.connection)
+        new_type = new_db_params['type']
+        if old_type != new_type:
+            for index_name, constraint_type, constraint_name in self._get_field_indexes(model, old_field):
+                # TODO
+                #self.execute("DROP INDEX %s" % name)
+                pass
+        super().alter_field(model, old_field, new_field, strict)
+
     def delete_model(self, model):
         """Delete a model from the database."""
         # delete related foreign key constraints
