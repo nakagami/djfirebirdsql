@@ -295,18 +295,17 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
 
     def _get_field_indexes(self, cursor, table_name, field_name):
         """
-          Return a list of index names that are not created automatically (ie: Foreign Key)
+          Return a list of index (name, type)
         """
         table = "'%s'" % table_name.upper()
         field = "'%s'" % field_name.upper()
         cursor.execute("""
-            select s.rdb$index_name
+            select s.rdb$index_name, rc.rdb$constraint_type
             from rdb$index_segments s
             left join rdb$indices i on i.rdb$index_name = s.rdb$index_name
             left join rdb$relation_constraints rc on rc.rdb$index_name = s.rdb$index_name
             where i.rdb$relation_name = %s
             and s.rdb$field_name = %s
-            and rc.rdb$constraint_type is null
             order by s.rdb$field_position """ % (table, field,))
 
-        return [index_name[0].strip() for index_name in cursor.fetchall()]
+        return [(i[0].strip(), i[1].strip()) for i in cursor.fetchall()]
