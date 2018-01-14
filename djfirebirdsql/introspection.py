@@ -224,6 +224,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         Some backends may return special constraint names that don't exist
         if they don't name constraints of a certain type (e.g. SQLite)
         """
+        # TODO: FIX check constraint
         tbl_name = "'%s'" % table_name.upper()
         constraints = {}
 
