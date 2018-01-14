@@ -47,10 +47,10 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         new_type = new_db_params['type']
         if old_type != new_type:
             for index_name, constraint_type, constraint_name in self._get_field_indexes(model, old_field):
-                # TODO: somethong wrong ?
+                # TODO: somethong wrong
                 if constraint_name:
-                    self.execute("ALTER TABLE %s DROP CONSTRAINT %s" % (
-                        quote_value(model._meta.db_table), constraint_name
+                    self.execute('ALTER TABLE "%s" DROP CONSTRAINT %s' % (
+                        model._meta.db_table.upper(), constraint_name
                     ))
         super().alter_field(model, old_field, new_field, strict)
 
