@@ -31,18 +31,7 @@ from .introspection import DatabaseIntrospection            # NOQA isort:skip
 from .operations import DatabaseOperations                  # NOQA isort:skip
 from .schema import DatabaseSchemaEditor                    # NOQA isort:skip
 
-
-def quote_value(value):
-    if isinstance(value, (datetime.date, datetime.time, datetime.datetime)):
-        return "'%s'" % value
-    elif isinstance(value, str):
-        return "'%s'" % value.replace("\'", "\'\'")
-    elif isinstance(value, (bytes, bytearray, memoryview)):
-        return "x'%s'" % binascii.hexlify(value).decode('ascii')
-    elif value is None:
-        return "NULL"
-    else:
-        return str(value)
+from .schema import quote_value
 
 
 def convert_sql(query, params):

@@ -6,6 +6,20 @@ from django.db.backends.base.schema import _related_non_m2m_objects
 from django.utils.encoding import force_text
 
 
+def quote_value(value):
+    import binascii
+    if isinstance(value, (datetime.date, datetime.time, datetime.datetime)):
+        return "'%s'" % value
+    elif isinstance(value, str):
+        return "'%s'" % value.replace("\'", "\'\'")
+    elif isinstance(value, (bytes, bytearray, memoryview)):
+        return "x'%s'" % binascii.hexlify(value).decode('ascii')
+    elif value is None:
+        return "NULL"
+    else:
+        return str(value)
+
+
 class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
     sql_rename_table = "Rename table is not allowed"  # Not supported
     sql_delete_table = "DROP TABLE %(table)s"
@@ -18,21 +32,8 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
     sql_create_fk = "ALTER TABLE %(table)s ADD CONSTRAINT %(name)s FOREIGN KEY (%(column)s) REFERENCES %(to_table)s (%(to_column)s) ON DELETE CASCADE"
     sql_delete_fk = "ALTER TABLE %(table)s DROP CONSTRAINT %(name)s"
 
-    def quote_value(self, value):
-        import binascii
-        if isinstance(value, (datetime.date, datetime.time, datetime.datetime)):
-            return "'%s'" % value
-        elif isinstance(value, str):
-            return "'%s'" % value.replace("\'", "\'\'")
-        elif isinstance(value, (bytes, bytearray, memoryview)):
-            return "x'%s'" % binascii.hexlify(value).decode('ascii')
-        elif value is None:
-            return "NULL"
-        else:
-            return str(value)
-
     def prepare_default(self, value):
-        return self.quote_value(value)
+        return quote_value(value)
 
     def _get_field_indexes(self, model, field):
         with self.connection.cursor() as cursor:
