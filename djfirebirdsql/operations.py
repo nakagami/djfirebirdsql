@@ -125,6 +125,28 @@ class DatabaseOperations(BaseDatabaseOperations):
         else:
             return []
 
+    def sequence_reset_sql(self, style, model_list):
+        from django.db import models
+        output = []
+        query = "ALTER TABLE %s ALTER COLUMN %s RESTART"
+        for model in model_list:
+            for f in model._meta.local_fields:
+                if isinstance(f, models.AutoField):
+                    output.append(query % (
+                        self.quote_name(model._meta.db_table),
+                        self.quote_name(f.column),
+                    ))
+                    # Only one AutoField is allowed per model, so don't
+                    # continue to loop
+                    break
+            for f in model._meta.many_to_many:
+                if not f.remote_field.through:
+                    output.append(query % (
+                        self.quote_name(f.m2m_db_table()),
+                        self.quote_name('id'),
+                    ))
+        return output
+
     def max_name_length(self):
         return 63
 
