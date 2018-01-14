@@ -125,6 +125,22 @@ class DatabaseOperations(BaseDatabaseOperations):
         else:
             return []
 
+    def sequence_reset_by_name_sql(self, style, sequences):
+        sql = []
+        query = "ALTER TABLE %s ALTER COLUMN %s RESTART"
+        for sequence_info in sequences:
+            table_name = sequence_info['table']
+            column_name = sequence_info['column']
+
+            if not column_name:
+                column_name = 'id'
+
+            sql.append(query % (
+                self.quote_name(table_name),
+                self.quote_name(column_name),
+            ))
+        return sql
+
     def sequence_reset_sql(self, style, model_list):
         from django.db import models
         output = []
