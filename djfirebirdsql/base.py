@@ -12,7 +12,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.db import DEFAULT_DB_ALIAS
 from django.db.backends.base.base import BaseDatabaseWrapper
 from django.db.backends import utils
-from django.db.utils import DatabaseError as WrappedDatabaseError
+from django.db.utils import InterfaceError
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.safestring import SafeText
@@ -181,10 +181,21 @@ class DatabaseWrapper(BaseDatabaseWrapper):
 
 
 class FirebirdCursorWrapper(Database.Cursor):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.closed = False
+
     def execute(self, query, params=None):
-        query = convert_sql(query, params)
-        return Database.Cursor.execute(self, query)
+        if self.closed:
+            raise InterfaceError('Cursor is closed')
+        return super().execute(convert_sql(query, params))
 
     def executemany(self, query, param_list):
+        if self.closed:
+            raise InterfaceError('Cursor is closed')
         for params in param_list:
-            Database.Cursor.execute(self, convert_sql(query, params))
+            super().execute(convert_sql(query, params))
+
+    def close(self):
+        super().close()
+        self.closed = True
