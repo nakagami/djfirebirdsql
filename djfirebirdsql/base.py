@@ -32,6 +32,36 @@ from .operations import DatabaseOperations                  # NOQA isort:skip
 from .schema import DatabaseSchemaEditor                    # NOQA isort:skip
 
 
+def quote_value(value):
+    if isinstance(value, (datetime.date, datetime.time, datetime.datetime)):
+        return "'%s'" % value
+    elif isinstance(value, str):
+        return "'%s'" % value.replace("\'", "\'\'")
+    elif isinstance(value, (bytes, bytearray, memoryview)):
+        return "x'%s'" % binascii.hexlify(value).decode('ascii')
+    elif value is None:
+        return "NULL"
+    else:
+        return str(value)
+
+
+def convert_sql(query, params):
+    if not params:
+        return query
+
+    converted_params = []
+    for p in params:
+        v = p
+        if isinstance(v, datetime.datetime) and timezone.is_aware(v):
+            v = v.astimezone(timezone.utc).replace(tzinfo=None)
+        converted_params.append(quote_value(v))
+    if len(converted_params) == 1:
+        query = query % converted_params[0]
+    else:
+        query = query % tuple(converted_params)
+    return query
+
+
 class DatabaseWrapper(BaseDatabaseWrapper):
     vendor = 'firebirdsql'
     display_name = 'FirebirdSQL'
@@ -151,8 +181,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
             self.connection.set_autocommit(autocommit)
 
     def create_cursor(self, name=None):
-        cursor = self.connection.cursor()
-        return FirebirdCursorWrapper(cursor, self)
+        return self.connection.cursor(factory=FirebirdCursorWrapper)
 
     def is_usable(self):
         return not self.connection.is_disconnect()
@@ -161,44 +190,12 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         if self.errors_occurred:
             self.close()
 
-    def quote_value(self, value):
-        if isinstance(value, (datetime.date, datetime.time, datetime.datetime)):
-            return "'%s'" % value
-        elif isinstance(value, str):
-            return "'%s'" % value.replace("\'", "\'\'")
-        elif isinstance(value, (bytes, bytearray, memoryview)):
-            return "x'%s'" % binascii.hexlify(value).decode('ascii')
-        elif value is None:
-            return "NULL"
-        else:
-            return str(value)
 
-    def convert_sql(self, query, params):
-        if not params:
-            return query
-
-        converted_params = []
-        for p in params:
-            v = p
-            if isinstance(v, datetime.datetime) and timezone.is_aware(v):
-                v = v.astimezone(timezone.utc).replace(tzinfo=None)
-            converted_params.append(self.quote_value(v))
-        if len(converted_params) == 1:
-            query = query % converted_params[0]
-        else:
-            query = query % tuple(converted_params)
-        return query
-
-
-class FirebirdCursorWrapper(utils.CursorWrapper):
-    def __init__(self, cursor, db):
-        self.cursor = cursor
-        self.db = db
-
+class FirebirdCursorWrapper(Database.Cursor):
     def execute(self, query, params=None):
-        sql = self.db.convert_sql(query, params)
-        super().execute(sql)
+        query = convert_sql(query, params)
+        return Database.Cursor.execute(self, query)
 
-    def executemany(self, query, params_list):
-        for params in params_list:
-            self.execute(query, params)
+    def executemany(self, query, param_list):
+        for params in param_list:
+            Database.Cursor.execute(self, convert_sql(query, params))
