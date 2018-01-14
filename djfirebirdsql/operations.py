@@ -22,7 +22,11 @@ class DatabaseOperations(BaseDatabaseOperations):
     }
 
     def cache_key_culling_sql(self):
-        return "SELECT cache_key FROM %s ORDER BY cache_key OFFSET %%s FETCH NEXT 1 ROWS ONLY"
+        return """
+            SELECT cache_key
+              FROM (SELECT cache_key, rank() OVER (ORDER BY cache_key) AS rank FROM %s)
+             WHERE rank = %%s + 1
+        """
 
     def unification_cast_sql(self, output_field):
         internal_type = output_field.get_internal_type()
