@@ -35,19 +35,26 @@ from .schema import quote_value
 
 
 def convert_sql(query, params):
-    if not params:
-        return query
-
-    converted_params = []
-    for p in params:
-        v = p
-        if isinstance(v, datetime.datetime) and timezone.is_aware(v):
-            v = v.astimezone(timezone.utc).replace(tzinfo=None)
-        converted_params.append(quote_value(v))
-    if len(converted_params) == 1:
-        query = query % converted_params[0]
-    else:
-        query = query % tuple(converted_params)
+    if params is None:
+        pass
+    elif isinstance(params, dict):
+        converted_params = {}
+        for k, v in params.items():
+            if isinstance(v, datetime.datetime) and timezone.is_aware(v):
+                v = v.astimezone(timezone.utc).replace(tzinfo=None)
+            converted_params[k] = quote_value(v)
+        query = query % converted_params
+    elif isinstance(params, (list, tuple)):
+        converted_params = []
+        for p in params:
+            v = p
+            if isinstance(v, datetime.datetime) and timezone.is_aware(v):
+                v = v.astimezone(timezone.utc).replace(tzinfo=None)
+            converted_params.append(quote_value(v))
+        if len(converted_params) == 1:
+            query = query % converted_params[0]
+        else:
+            query = query % tuple(converted_params)
     return query
 
 
