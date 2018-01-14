@@ -26,7 +26,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     can_introspect_small_integer_field = True
     supports_timezones = False
     closed_cursor_error_class = InterfaceError
-    has_case_insensitive_like = True
+    has_case_insensitive_like = False
     implied_column_null = True
     uppercases_column_names = True
     ignores_table_name_case = True
