@@ -53,6 +53,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
                 #    self.execute('ALTER TABLE "%s" DROP CONSTRAINT %s' % (
                 #        model._meta.db_table.upper(), constraint_name
                 #    ))
+        strict = False  # TODO: get_constraints() is not found check constraint.
         super().alter_field(model, old_field, new_field, strict)
 
     def delete_model(self, model):
