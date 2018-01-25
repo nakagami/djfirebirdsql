@@ -273,7 +273,9 @@ class DatabaseOperations(BaseDatabaseOperations):
         if isinstance(sql, datetime.timedelta):
             sql, timedelta = timedelta, sql
         sign = 1 if connector == '+' else -1
-        if isinstance(timedelta, str):
+        if isinstance(sql, str) and isinstance(timedelta, str):
+            return '%s%s%s' % (sql, connector, timedelta)
+        elif isinstance(timedelta, str):
             return 'DATEADD(MILLISECOND, %s%s/1000, %s)' % (connector, timedelta, sql)
         elif timedelta.days:
             unit = 'day'
