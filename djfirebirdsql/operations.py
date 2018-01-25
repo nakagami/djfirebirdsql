@@ -268,15 +268,20 @@ class DatabaseOperations(BaseDatabaseOperations):
     def combine_duration_expression(self, connector, sub_expressions):
         if connector not in ['+', '-']:
             raise DatabaseError('Invalid connector for timedelta: %s.' % connector)
+        sign = 1 if connector == '+' else -1
 
         sql, timedelta = sub_expressions
+        if isinstance(sql, str) and isinstance(timedelta, str):
+            if sql == '%s':
+                # TODO: FIXME
+                return 'DATEADD(MILLISECOND, %s%s/1000 %s)' % (connector, timedelta, sql)
+            else:
+                return 'DATEADD(MILLISECOND, %s%s/1000, %s)' % (connector, timedelta, sql)
+
         if isinstance(sql, datetime.timedelta):
             sql, timedelta = timedelta, sql
-        sign = 1 if connector == '+' else -1
-        if isinstance(sql, str) and isinstance(timedelta, str):
-            unit = 'millisecond'
-            value = '(%s/1000)' % (timedelta,)
-        elif isinstance(timedelta, str):
+
+        if isinstance(timedelta, str):
             return 'DATEADD(MILLISECOND, %s%s/1000, %s)' % (connector, timedelta, sql)
         elif timedelta.days:
             unit = 'day'

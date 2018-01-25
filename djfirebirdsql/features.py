@@ -18,7 +18,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_regex_backreferencing = False
     has_bulk_insert = False
     can_return_id_from_insert = True
-    has_native_duration_field = False
     has_select_for_update = False
     for_update_after_from = False
     can_release_savepoints = True
