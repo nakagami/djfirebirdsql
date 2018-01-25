@@ -270,9 +270,11 @@ class DatabaseOperations(BaseDatabaseOperations):
             raise DatabaseError('Invalid connector for timedelta: %s.' % connector)
 
         sql, timedelta = sub_expressions
+        if isinstance(sql, datetime.timedelta):
+            sql, timedelta = timedelta, sql
         sign = 1 if connector == '+' else -1
         if isinstance(timedelta, str):
-            return 'DATEADD(MILLISECOND, %s%s/1000000, %s)' % (connector, timedelta, sql)
+            return 'DATEADD(MILLISECOND, %s%s/1000, %s)' % (connector, timedelta, sql)
         elif timedelta.days:
             unit = 'day'
             value = timedelta.days
