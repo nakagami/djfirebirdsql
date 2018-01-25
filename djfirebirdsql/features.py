@@ -37,4 +37,4 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_microsecond_precision = False
     supports_index_column_ordering = False
     bare_select_suffix = " FROM RDB$DATABASE"
-    requires_literal_defaults = True
+    requires_literal_defaults = False
