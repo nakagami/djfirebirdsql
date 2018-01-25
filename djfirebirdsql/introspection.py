@@ -273,7 +273,6 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
                 unique = True
             elif constraint_type == 'FOREIGN KEY':
                 foreign_key = (other_table, other_column,)
-                index = True
             elif constraint_type == 'INDEX':
                 index = True
 
