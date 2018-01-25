@@ -31,7 +31,7 @@ from .introspection import DatabaseIntrospection            # NOQA isort:skip
 from .operations import DatabaseOperations                  # NOQA isort:skip
 from .schema import DatabaseSchemaEditor                    # NOQA isort:skip
 
-from .schema import quote_value
+from .schema import _quote_value
 
 
 def convert_sql(query, params):
@@ -42,7 +42,7 @@ def convert_sql(query, params):
         for k, v in params.items():
             if isinstance(v, datetime.datetime) and timezone.is_aware(v):
                 v = v.astimezone(timezone.utc).replace(tzinfo=None)
-            converted_params[k] = quote_value(v)
+            converted_params[k] = _quote_value(v)
         query = query % converted_params
     elif isinstance(params, (list, tuple)):
         converted_params = []
@@ -50,7 +50,7 @@ def convert_sql(query, params):
             v = p
             if isinstance(v, datetime.datetime) and timezone.is_aware(v):
                 v = v.astimezone(timezone.utc).replace(tzinfo=None)
-            converted_params.append(quote_value(v))
+            converted_params.append(_quote_value(v))
         if len(converted_params) == 1:
             query = query % converted_params[0]
         else:

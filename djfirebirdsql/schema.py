@@ -6,7 +6,7 @@ from django.db.backends.base.schema import _related_non_m2m_objects
 from django.utils.encoding import force_text
 
 
-def quote_value(value):
+def _quote_value(value):
     import binascii
     if isinstance(value, (datetime.date, datetime.time, datetime.datetime)):
         return "'%s'" % value
@@ -31,6 +31,9 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
     sql_rename_column = "ALTER TABLE %(table)s ALTER %(old_column)s TO %(new_column)s"
     sql_create_fk = "ALTER TABLE %(table)s ADD CONSTRAINT %(name)s FOREIGN KEY (%(column)s) REFERENCES %(to_table)s (%(to_column)s) ON DELETE CASCADE"
     sql_delete_fk = "ALTER TABLE %(table)s DROP CONSTRAINT %(name)s"
+
+    def quote_value(self, value):
+        return _quote_value(value)
 
     def prepare_default(self, value):
         return quote_value(value)
