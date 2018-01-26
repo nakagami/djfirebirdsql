@@ -129,30 +129,22 @@ class DatabaseOperations(BaseDatabaseOperations):
         else:
             return []
 
-    def sequence_reset_by_name_sql(self, style, sequences):
-        sql = []
-        query = "ALTER TABLE %s ALTER COLUMN %s RESTART"
-        for sequence_info in sequences:
-            table_name = sequence_info['table']
-            column_name = sequence_info['column']
-
-            if not column_name:
-                column_name = 'id'
-
-            sql.append(query % (
-                self.quote_name(table_name),
-                self.quote_name(column_name),
-            ))
-        return sql
-
     def sequence_reset_sql(self, style, model_list):
         from django.db import models
         output = []
-        query = "ALTER TABLE %s ALTER COLUMN %s RESTART"
+        query = """EXECUTE BLOCK AS
+            DECLARE S VARCHAR(255);
+            DECLARE N INT;
+            BEGIN
+                SELECT MAX(%s) FROM %s INTO :N;
+                EXECUTE STATEMENT 'ALTER TABLE %s ALTER COLUMN %s RESTART WITH ' || N;
+            END"""
         for model in model_list:
             for f in model._meta.local_fields:
                 if isinstance(f, models.AutoField):
                     output.append(query % (
+                        self.quote_name(f.column),
+                        self.quote_name(model._meta.db_table),
                         self.quote_name(model._meta.db_table),
                         self.quote_name(f.column),
                     ))
@@ -162,6 +154,8 @@ class DatabaseOperations(BaseDatabaseOperations):
             for f in model._meta.many_to_many:
                 if not f.remote_field.through:
                     output.append(query % (
+                        self.quote_name('id'),
+                        self.quote_name(f.m2m_db_table()),
                         self.quote_name(f.m2m_db_table()),
                         self.quote_name('id'),
                     ))

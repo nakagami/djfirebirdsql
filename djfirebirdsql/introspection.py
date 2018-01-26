@@ -43,6 +43,9 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
     def table_name_converter(self, name):
         return name.lower()
 
+    def sequence_list(self):
+        return []
+
     def get_table_list(self, cursor):
         "Returns a list of table names in the current database."
         cursor.execute("""
