@@ -272,11 +272,10 @@ class DatabaseOperations(BaseDatabaseOperations):
 
         sql, timedelta = sub_expressions
         if isinstance(sql, str) and isinstance(timedelta, str):
-            if sql == '%s':
-                # TODO: FIXME
-                return 'DATEADD(MILLISECOND, %s%s/1000 %s)' % (connector, timedelta, sql)
+            if connector == '-':
+                return 'DATEDIFF(%s, %s)' % (sql, timedelta)
             else:
-                return 'DATEADD(MILLISECOND, %s%s/1000, %s)' % (connector, timedelta, sql)
+                return 'DATEADD(MILLISECOND, %s/1000, %s)' % (connector, timedelta, sql)
 
         if isinstance(sql, datetime.timedelta):
             sql, timedelta = timedelta, sql
