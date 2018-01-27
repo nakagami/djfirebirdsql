@@ -34,6 +34,12 @@ class DatabaseOperations(BaseDatabaseOperations):
             return 'CAST(%%s AS %s)' % output_field.db_type(self.connection).split('(')[0]
         return '%s'
 
+    def check_expression_support(self, expression):
+        from django.db.models.aggregates import Avg
+
+        if isinstance(expression, Avg):
+            expression.template = '%(function)s(CAST(%(expressions)s as double precision))'
+
     def date_extract_sql(self, lookup_type, field_name):
         if lookup_type == 'week_day':
             return "EXTRACT(WEEKDAY FROM %s) + 1" % field_name
