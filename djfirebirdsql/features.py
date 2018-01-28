@@ -37,5 +37,3 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_index_column_ordering = False
     bare_select_suffix = " FROM RDB$DATABASE"
     requires_literal_defaults = False
-    # TODO: fix get_constraint() and can_introspect_foreign_keys = True
-    can_introspect_foreign_keys = False
