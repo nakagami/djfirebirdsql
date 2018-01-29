@@ -62,6 +62,11 @@ class DatabaseOperations(BaseDatabaseOperations):
     def date_extract_sql(self, lookup_type, field_name):
         if lookup_type == 'week_day':
             return "EXTRACT(WEEKDAY FROM %s) + 1" % field_name
+        elif lookup_type == 'quarter':
+            return "((EXTRACT(MONTH FROM %s) - 1) / 3 + 1)" % field_name
+        elif lookup_type == 'week':
+            from django.db.utils import NotSupportedError
+            raise NotSupportedError('EXTRACT week')
         return "EXTRACT(%s FROM %s)" % (lookup_type.upper(), field_name)
 
     def date_interval_sql(self, timedelta):
@@ -91,6 +96,11 @@ class DatabaseOperations(BaseDatabaseOperations):
     def datetime_extract_sql(self, lookup_type, field_name, tzname):
         if lookup_type == 'week_day':
             sql = "EXTRACT(WEEKDAY FROM %s) + 1" % field_name
+        elif lookup_type == 'quarter':
+            sql = "((EXTRACT(MONTH FROM %s) - 1) / 3 + 1)" % field_name
+        elif lookup_type == 'week':
+            from django.db.utils import NotSupportedError
+            raise NotSupportedError('EXTRACT week')
         else:
             sql = "EXTRACT(%s FROM %s)" % (lookup_type.upper(), field_name)
         return sql
@@ -108,7 +118,6 @@ class DatabaseOperations(BaseDatabaseOperations):
         hh = "EXTRACT(hour FROM %s)" % field_name
         mm = "EXTRACT(minute FROM %s)" % field_name
         ss = "EXTRACT(second FROM %s)" % field_name
-        week = "EXTRACT(week FROM %s)" % field_name
         if lookup_type == 'year':
             sql = "%s||'-01-01 00:00:00'" % year
         elif lookup_type == 'month':
@@ -121,9 +130,6 @@ class DatabaseOperations(BaseDatabaseOperations):
             sql = "%s||'-'||%s||'-'||%s||' '||%s||':'||%s||':00'" % (year, month, day, hh, mm)
         elif lookup_type == 'second':
             sql = "%s||'-'||%s||'-'||%s||' '||%s||':'||%s||':'||%s" % (year, month, day, hh, mm, ss)
-        elif lookup_type == 'week':
-            from django.db.utils import NotSupportedError
-            raise NotSupportedError('EXTRACT week')
         return "CAST(%s AS TIMESTAMP)" % sql
 
     def time_trunc_sql(self, lookup_type, field_name):
