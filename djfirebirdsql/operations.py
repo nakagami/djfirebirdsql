@@ -108,6 +108,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         hh = "EXTRACT(hour FROM %s)" % field_name
         mm = "EXTRACT(minute FROM %s)" % field_name
         ss = "EXTRACT(second FROM %s)" % field_name
+        week = "EXTRACT(week FROM %s)" % field_name
         if lookup_type == 'year':
             sql = "%s||'-01-01 00:00:00'" % year
         elif lookup_type == 'month':
@@ -120,6 +121,8 @@ class DatabaseOperations(BaseDatabaseOperations):
             sql = "%s||'-'||%s||'-'||%s||' '||%s||':'||%s||':00'" % (year, month, day, hh, mm)
         elif lookup_type == 'second':
             sql = "%s||'-'||%s||'-'||%s||' '||%s||':'||%s||':'||%s" % (year, month, day, hh, mm, ss)
+        elif lookup_type == 'week':
+            sql = week
         return "CAST(%s AS TIMESTAMP)" % sql
 
     def time_trunc_sql(self, lookup_type, field_name):
