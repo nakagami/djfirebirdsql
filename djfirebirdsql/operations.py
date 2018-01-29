@@ -8,6 +8,9 @@ from django.db.backends.base.operations import BaseDatabaseOperations
 from django.utils import timezone
 from django.utils.encoding import force_text
 from django.db.utils import DatabaseError
+from django.db.models.functions import ConcatPair
+
+ConcatPair.as_sql = ConcatPair.as_sqlite
 
 class DatabaseOperations(BaseDatabaseOperations):
     compiler_module = "djfirebirdsql.compiler"
