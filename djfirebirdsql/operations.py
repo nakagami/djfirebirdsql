@@ -8,9 +8,38 @@ from django.db.backends.base.operations import BaseDatabaseOperations
 from django.utils import timezone
 from django.utils.encoding import force_text
 from django.db.utils import DatabaseError
-from django.db.models.functions import ConcatPair
+from django.db.models.functions import ConcatPair, Substr
+
+
+def _substr_as_sql(self, compiler, connection, function=None, template=None, arg_joiner=None, **extra_context):
+    connection.ops.check_expression_support(self)
+    sql_parts = []
+    params = []
+    for arg in self.source_expressions:
+        arg_sql, arg_params = compiler.compile(arg)
+        sql_parts.append(arg_sql)
+        params.extend(arg_params)
+    data = {**self.extra, **extra_context}
+    # Use the first supplied value in this order: the parameter to this
+    # method, a value supplied in __init__()'s **extra (the value in
+    # `data`), or the value defined on the class.
+    if function is not None:
+        data['function'] = function
+    else:
+        data.setdefault('function', self.function)
+    template = template or data.get('template', self.template)
+    arg_joiner = arg_joiner or data.get('arg_joiner', self.arg_joiner)
+    data['expressions'] = data['field'] = arg_joiner.join(sql_parts)
+
+    if len(sql_parts) == 2:
+        template = 'SUBSTRING(%s FROM %s)' % (sql_parts[0], sql_parts[1])
+    else:
+        template = 'SUBSTRING(%s FROM %s FOR %s)' % (sql_parts[0], sql_parts[1], sql_parts[2])
+    return template, params
+
 
 ConcatPair.as_sql = ConcatPair.as_sqlite
+Substr.as_sql = _substr_as_sql
 
 class DatabaseOperations(BaseDatabaseOperations):
     compiler_module = "djfirebirdsql.compiler"
@@ -40,7 +69,7 @@ class DatabaseOperations(BaseDatabaseOperations):
     def check_expression_support(self, expression):
         from django.db.models.aggregates import Avg
         from django.db.models.expressions import Value
-        from django.db.models.functions import Greatest, Least, StrIndex
+        from django.db.models.functions import Greatest, Least, StrIndex, Length
 
         if isinstance(expression, Avg):
             expression.template = '%(function)s(CAST(%(expressions)s as double precision))'
@@ -55,6 +84,8 @@ class DatabaseOperations(BaseDatabaseOperations):
                 expression.source_expressions[0]
             ]
             expression.template = 'POSITION(%(expressions)s)'
+        elif isinstance(expression, Length):
+            expression.template = 'CHARACTER_LENGTH(%(expressions)s)'
         elif isinstance(expression, Value):
             if isinstance(expression.value, datetime.datetime):
                 expression.value = str(expression.value)[:24]
