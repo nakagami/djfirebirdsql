@@ -240,7 +240,7 @@ class DatabaseOperations(BaseDatabaseOperations):
                 second=value.second,
                 microsecond=(value.microsecond //100) * 100
             )
-        return force_text(value)[:2]
+        return force_text(value)[:24]
 
     def adapt_timefield_value(self, value):
         if value is None:
