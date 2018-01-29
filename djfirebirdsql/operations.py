@@ -37,7 +37,7 @@ class DatabaseOperations(BaseDatabaseOperations):
     def check_expression_support(self, expression):
         from django.db.models.aggregates import Avg
         from django.db.models.expressions import Value
-        from django.db.models.functions import Greatest, Least
+        from django.db.models.functions import Greatest, Least, StrIndex
 
         if isinstance(expression, Avg):
             expression.template = '%(function)s(CAST(%(expressions)s as double precision))'
@@ -45,6 +45,13 @@ class DatabaseOperations(BaseDatabaseOperations):
             expression.template = 'MAXVALUE(%(expressions)s)'
         elif isinstance(expression, Least):
             expression.template = 'MINVALUE(%(expressions)s)'
+        elif isinstance(expression, StrIndex):
+            # swap parameter
+            expression.source_expressions = [
+                expression.source_expressions[1],
+                expression.source_expressions[0]
+            ]
+            expression.template = 'POSITION(%(expressions)s)'
         elif isinstance(expression, Value):
             if isinstance(expression.value, datetime.datetime):
                 expression.value = str(expression.value)[:24]
