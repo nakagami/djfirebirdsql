@@ -231,10 +231,16 @@ class DatabaseOperations(BaseDatabaseOperations):
 
         # Replaces 6 digits microseconds to 4 digits allowed in Firebird
         if isinstance(value, datetime.datetime):
-            value = str(value)
-        if isinstance(value, str):
-            value = value[:24]
-        return force_text(value)
+            value = datetime.datetime(
+                year=value.year,
+                month=value.month,
+                day=value.day,
+                hour=value.hour,
+                minute=value.minute,
+                second=value.second,
+                microsecond=(value.microsecond //100) * 100
+            )
+        return force_text(value)[:2]
 
     def adapt_timefield_value(self, value):
         if value is None:
