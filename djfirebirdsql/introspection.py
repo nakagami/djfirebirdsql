@@ -171,45 +171,6 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             relations[my_fieldname] = (other_field, other_table)
         return relations
 
-    def get_indexes(self, cursor, table_name):
-        """
-        Returns a dictionary of fieldname -> infodict for the given table,
-        where each infodict is in the format:
-            {'primary_key': boolean representing whether it's the primary key,
-             'unique': boolean representing whether it's a unique index/constraint}
-        """
-
-        # This query retrieves each field name and index type on the given table.
-        tbl_name = "'%s'" % table_name.upper()
-        cursor.execute("""
-        SELECT
-          LOWER(s.RDB$FIELD_NAME) AS field_name,
-
-          LOWER(case
-            when rc.RDB$CONSTRAINT_TYPE is not null then rc.RDB$CONSTRAINT_TYPE
-            else 'INDEX'
-          end) AS constraint_type
-
-        FROM RDB$INDEX_SEGMENTS s
-        LEFT JOIN RDB$INDICES i ON i.RDB$INDEX_NAME = s.RDB$INDEX_NAME
-        LEFT JOIN RDB$RELATION_CONSTRAINTS rc ON rc.RDB$INDEX_NAME = s.RDB$INDEX_NAME
-        WHERE i.RDB$RELATION_NAME = %s
-        AND i.RDB$SEGMENT_COUNT = 1
-        ORDER BY s.RDB$FIELD_POSITION
-        """ % (tbl_name,))
-        indexes = {}
-        for fn, ct in cursor.fetchall():
-            field_name = fn.strip()
-            constraint_type = ct.strip()
-            if field_name not in indexes:
-                indexes[field_name] = {'primary_key': False, 'unique': False}
-            # It's possible to have the unique and PK constraints in separate indexes.
-            if constraint_type == 'primary key':
-                indexes[field_name]['primary_key'] = True
-            if constraint_type == 'unique':
-                indexes[field_name]['unique'] = True
-        return indexes
-
     def get_constraints(self, cursor, table_name):
         """
         Retrieves any constraints or keys (unique, pk, fk, check, index)
