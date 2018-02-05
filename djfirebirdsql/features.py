@@ -5,7 +5,6 @@ from django.db.utils import InterfaceError
 class DatabaseFeatures(BaseDatabaseFeatures):
     supports_forward_references = False
     supports_tablespaces = False
-    supports_timezones = False
     has_zoneinfo_database = False
     uses_savepoints = True
     supports_paramstyle_pyformat = True
@@ -30,7 +29,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     uppercases_column_names = True
     ignores_table_name_case = True
     truncates_names = True
-    atomic_transactions = False
+    atomic_transactions = True
     supports_select_intersection = False
     supports_select_difference = False
     supports_microsecond_precision = False
@@ -38,3 +37,4 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     bare_select_suffix = " FROM RDB$DATABASE"
     requires_literal_defaults = False
     supports_cast_with_precision = False
+    supports_sequence_reset = False
