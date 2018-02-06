@@ -1,5 +1,6 @@
 import uuid
 import datetime
+import pytz
 import firebirdsql as Database
 
 from django.conf import settings
@@ -244,7 +245,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         # Firebird doesn't support tz-aware datetimes
         if timezone.is_aware(value):
             if settings.USE_TZ:
-                value = value.astimezone(timezone.utc).replace(tzinfo=None)
+                value = value.astimezone(pytz.timezone(settings.TIME_ZONE)).replace(tzinfo=None)
             else:
                 raise ValueError("Firebird backend does not support timezone-aware datetimes when USE_TZ is False.")
 
