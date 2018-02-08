@@ -19,7 +19,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     can_return_id_from_insert = True
     has_select_for_update = False
     for_update_after_from = False
-    can_release_savepoints = True
     supports_transactions = True
     can_introspect_small_integer_field = True
     supports_timezones = False
@@ -32,7 +31,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     atomic_transactions = True
     supports_select_intersection = False
     supports_select_difference = False
-    supports_microsecond_precision = False
     supports_index_column_ordering = False
     bare_select_suffix = " FROM RDB$DATABASE"
     requires_literal_defaults = False
