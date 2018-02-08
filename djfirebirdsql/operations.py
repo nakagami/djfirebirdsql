@@ -119,8 +119,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         elif lookup_type == 'quarter':
             sql = "((EXTRACT(MONTH FROM %s) - 1) / 3 + 1)" % field_name
         elif lookup_type == 'week':
-            from django.db.utils import NotSupportedError
-            raise NotSupportedError('EXTRACT week')
+            sql = "EXTRACT(YEARDAY FROM %s) / 7 + 1" % field_name
         else:
             sql = "EXTRACT(%s FROM %s)" % (lookup_type.upper(), field_name)
         return sql
@@ -139,6 +138,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         mm = "EXTRACT(minute FROM %s)" % field_name
         ss = "EXTRACT(second FROM %s)" % field_name
         week = "EXTRACT(week FROM %s)" % field_name
+        weekday = "EXTRACT(weekday FROM %s)" % field_name
         if lookup_type == 'year':
             sql = "%s||'-01-01 00:00:00'" % year
         elif lookup_type == 'month':
@@ -152,7 +152,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         elif lookup_type == 'second':
             sql = "%s||'-'||%s||'-'||%s||' '||%s||':'||%s||':'||%s" % (year, month, day, hh, mm, ss)
         elif lookup_type == 'week':
-            sql = "DATEADD(day, (%s -1)*7, CAST(%s||'-01-01 00:00:00' AS TIMESTAMP))" % (week, year)
+            sql = "DATEADD(day, -%s+1, CAST(%s||'-'||%s||'-'||%s||' 00:00:00' AS TIMESTAMP))" % (weekday, year, month, day)
         return "CAST(%s AS TIMESTAMP)" % sql
 
     def time_trunc_sql(self, lookup_type, field_name):
@@ -333,7 +333,7 @@ class DatabaseOperations(BaseDatabaseOperations):
             if connector == '-':
                 return 'DATEDIFF(%s, %s)' % (sql, timedelta)
             else:
-                return 'DATEADD(MILLISECOND, %s/1000, %s)' % (connector, timedelta, sql)
+                return 'DATEADD(MILLISECOND, %s/1000, %s)' % (timedelta, sql)
 
         if isinstance(sql, datetime.timedelta):
             sql, timedelta = timedelta, sql
