@@ -153,7 +153,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         elif lookup_type == 'second':
             sql = "%s||'-'||%s||'-'||%s||' '||%s||':'||%s||':'||%s" % (year, month, day, hh, mm, ss)
         elif lookup_type == 'week':
-            sql = "DATEADD(day, %s-%s, CAST(%s||'-01-01 00:00:00' AS TIMESTAMP))" % (yearday, weekday, year)
+            sql = "DATEADD(day, IIF(%s = 0, -6, -%s+1), CAST(%s||'-'||%s||'-'||%s||' 00:00:00' AS TIMESTAMP))" % (weekday, weekday, year, month, day)
         return "CAST(%s AS TIMESTAMP)" % sql
 
     def time_trunc_sql(self, lookup_type, field_name):
