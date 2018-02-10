@@ -9,7 +9,7 @@ from django.db.backends.base.operations import BaseDatabaseOperations
 from django.utils import timezone
 from django.utils.encoding import force_text
 from django.db.utils import DatabaseError
-from django.db.models.functions import ConcatPair, Substr
+from django.db.models.functions import ConcatPair, Substr, StrIndex
 
 
 def _substr_as_sql(self, compiler, connection, function=None, template=None, arg_joiner=None, **extra_context):
@@ -28,8 +28,29 @@ def _substr_as_sql(self, compiler, connection, function=None, template=None, arg
     return template, params
 
 
+def _str_index_as_sql(self, compiler, connection, function=None, template=None, arg_joiner=None, **extra_context):
+    connection.ops.check_expression_support(self)
+    sql_parts = []
+    params = []
+    for arg in self.source_expressions:
+        arg_sql, arg_params = compiler.compile(arg)
+        sql_parts.append(arg_sql)
+        params.extend(arg_params)
+    data = {**self.extra, **extra_context}
+    if function is not None:
+        data['function'] = function
+    else:
+        data.setdefault('function', self.function)
+    template = 'POSITION(%(expressions)s)'
+    arg_joiner = arg_joiner or data.get('arg_joiner', self.arg_joiner)
+    sql_parts.reverse()
+    data['expressions'] = data['field'] = arg_joiner.join(sql_parts)
+    return template % data, params
+
+
 ConcatPair.as_sql = ConcatPair.as_sqlite
 Substr.as_sql = _substr_as_sql
+StrIndex.as_sql = _str_index_as_sql
 
 class DatabaseOperations(BaseDatabaseOperations):
     compiler_module = "djfirebirdsql.compiler"
@@ -59,7 +80,7 @@ class DatabaseOperations(BaseDatabaseOperations):
     def check_expression_support(self, expression):
         from django.db.models.aggregates import Avg
         from django.db.models.expressions import Value
-        from django.db.models.functions import Greatest, Least, StrIndex, Length
+        from django.db.models.functions import Greatest, Least, Length
 
         if isinstance(expression, Avg):
             expression.template = '%(function)s(CAST(%(expressions)s as double precision))'
@@ -67,13 +88,6 @@ class DatabaseOperations(BaseDatabaseOperations):
             expression.template = 'MAXVALUE(%(expressions)s)'
         elif isinstance(expression, Least):
             expression.template = 'MINVALUE(%(expressions)s)'
-        elif isinstance(expression, StrIndex):
-            # swap parameter
-            expression.source_expressions = [
-                expression.source_expressions[1],
-                expression.source_expressions[0]
-            ]
-            expression.template = 'POSITION(%(expressions)s)'
         elif isinstance(expression, Length):
             expression.template = 'CHARACTER_LENGTH(%(expressions)s)'
         elif isinstance(expression, Value):
