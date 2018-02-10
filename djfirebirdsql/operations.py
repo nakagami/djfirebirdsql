@@ -33,7 +33,7 @@ Substr.as_sql = _substr_as_sql
 
 class DatabaseOperations(BaseDatabaseOperations):
     compiler_module = "djfirebirdsql.compiler"
-    cast_char_field_without_max_length = 'blob subtype text'
+    cast_char_field_without_max_length = 'varchar(8191)'
 
     integer_field_ranges = {
         'SmallIntegerField': (-32768, 32767),
