@@ -1,4 +1,5 @@
 import datetime
+import uuid
 
 from django.db.models.fields import AutoField
 from django.db.backends.base.schema import BaseDatabaseSchemaEditor
@@ -10,6 +11,8 @@ def _quote_value(value):
     import binascii
     if isinstance(value, (datetime.date, datetime.time, datetime.datetime)):
         return "'%s'" % value
+    if isinstance(value, uuid.UUID):
+        return "'%s'" % uuid.hex
     elif isinstance(value, str):
         return "'%s'" % value.replace("\'", "\'\'")
     elif isinstance(value, (bytes, bytearray, memoryview)):
