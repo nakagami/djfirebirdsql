@@ -186,7 +186,6 @@ class DatabaseOperations(BaseDatabaseOperations):
         return None
 
     def quote_name(self, name):
-        name = '_'.join(name.split(' '))
         if not name.startswith('"') and not name.endswith('"'):
             name = '"%s"' % truncate_name(name, self.max_name_length())
         return name.upper()

@@ -41,7 +41,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
     }
 
     def table_name_converter(self, name):
-        return name.lower()
+        return name.upper()
 
     def sequence_list(self):
         return []
