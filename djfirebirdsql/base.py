@@ -126,12 +126,12 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     # the LIKE operator.
     pattern_esc = r"REPLACE(REPLACE(REPLACE({}, '\', '\\'), '%%', '\%%'), '_', '\_')"
     pattern_ops = {
-        'contains': "LIKE '%%' || {} || '%%'",
-        'icontains': "LIKE '%%' || UPPER({}) || '%%'",
-        'startswith': "LIKE {} || '%%'",
-        'istartswith': "LIKE UPPER({}) || '%%'",
-        'endswith': "LIKE '%%' || {}",
-        'iendswith': "LIKE '%%' || UPPER({})",
+        'contains': "LIKE '%%' || {} || '%%' ESCAPE'\\'",
+        'icontains': "LIKE '%%' || UPPER({}) || '%%' ESCAPE'\\'",
+        'startswith': "LIKE {} || '%%' ESCAPE'\\'",
+        'istartswith': "LIKE UPPER({}) || '%%' ESCAPE'\\'",
+        'endswith': "LIKE '%%' || {} ESCAPE'\\'",
+        'iendswith': "LIKE '%%' || UPPER({}) ESCAPE'\\'",
     }
 
     Database = Database
