@@ -8,8 +8,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     has_zoneinfo_database = False
     uses_savepoints = True
     supports_paramstyle_pyformat = True
-    connection_persists_old_columns = True
-    can_rollback_ddl = False
     has_native_uuid_field = False
     has_native_duration_field = False
     supports_column_check_constraints = False
