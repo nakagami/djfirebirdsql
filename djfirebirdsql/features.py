@@ -35,3 +35,4 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_cast_with_precision = False
     supports_sequence_reset = False
     supports_subqueries_in_group_by = False
+    supports_index_column_ordering = False
