@@ -53,7 +53,6 @@ Substr.as_sql = _substr_as_sql
 StrIndex.as_sql = _str_index_as_sql
 
 class DatabaseOperations(BaseDatabaseOperations):
-    compiler_module = "djfirebirdsql.compiler"
     cast_char_field_without_max_length = 'varchar(8191)'
 
     integer_field_ranges = {
@@ -184,6 +183,13 @@ class DatabaseOperations(BaseDatabaseOperations):
 
     def no_limit_value(self):
         return None
+
+    def limit_offset_sql(self, low_mark, high_mark):
+        fetch, offset = self._get_limit_offset_params(low_mark, high_mark)
+        return '%s%s' % (
+            (' OFFSET %d ROWS' % offset) if offset else '',
+            (' FETCH FIRST %d ROWS ONLY' % fetch) if fetch else '',
+        )
 
     def quote_name(self, name):
         if not name.startswith('"') and not name.endswith('"'):
