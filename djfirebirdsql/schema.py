@@ -39,7 +39,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         return _quote_value(value)
 
     def prepare_default(self, value):
-        return quote_value(value)
+        return self.quote_value(value)
 
     def _get_field_indexes(self, model, field):
         with self.connection.cursor() as cursor:

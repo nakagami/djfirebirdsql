@@ -31,7 +31,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_select_difference = False
     supports_index_column_ordering = False
     bare_select_suffix = " FROM RDB$DATABASE"
-    requires_literal_defaults = False
+    requires_literal_defaults = True
     supports_cast_with_precision = False
     supports_sequence_reset = False
     supports_subqueries_in_group_by = False
