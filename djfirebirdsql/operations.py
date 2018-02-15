@@ -359,9 +359,9 @@ class DatabaseOperations(BaseDatabaseOperations):
         sql, timedelta = sub_expressions
         if isinstance(sql, str) and isinstance(timedelta, str):
             if connector == '-':
-                return 'DATEDIFF(%s, %s)' % (sql, timedelta)
+                return 'DATEADD(MILLISECOND, -%s/1000, cast(%s as date))' % (timedelta, sql)
             else:
-                return 'DATEADD(MILLISECOND, %s/1000, %s)' % (timedelta, sql)
+                return 'DATEADD(MILLISECOND, %s/1000, cast(%s as date))' % (timedelta, sql)
 
         if isinstance(sql, datetime.timedelta):
             sql, timedelta = timedelta, sql
