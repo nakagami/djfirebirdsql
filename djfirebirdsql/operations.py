@@ -98,8 +98,6 @@ class DatabaseOperations(BaseDatabaseOperations):
             return "EXTRACT(WEEKDAY FROM %s) + 1" % field_name
         elif lookup_type == 'quarter':
             return "((EXTRACT(MONTH FROM %s) - 1) / 4 + 1)" % field_name
-        elif lookup_type == 'week':
-            return "(EXTRACT(YEARDAY FROM %s) / 7 + 1)" % field_name
         return "EXTRACT(%s FROM %s)" % (lookup_type.upper(), field_name)
 
     def date_interval_sql(self, timedelta):
@@ -131,8 +129,6 @@ class DatabaseOperations(BaseDatabaseOperations):
             sql = "EXTRACT(WEEKDAY FROM %s) + 1" % field_name
         elif lookup_type == 'quarter':
             sql = "((EXTRACT(MONTH FROM %s) - 1) / 3 + 1)" % field_name
-        elif lookup_type == 'week':
-            sql = "EXTRACT(YEARDAY FROM %s) / 7 + 1" % field_name
         else:
             sql = "EXTRACT(%s FROM %s)" % (lookup_type.upper(), field_name)
         return sql
@@ -150,7 +146,6 @@ class DatabaseOperations(BaseDatabaseOperations):
         hh = "EXTRACT(hour FROM %s)" % field_name
         mm = "EXTRACT(minute FROM %s)" % field_name
         ss = "EXTRACT(second FROM %s)" % field_name
-        week = "EXTRACT(week FROM %s)" % field_name
         yearday = "EXTRACT(yearday FROM %s)" % field_name
         weekday = "EXTRACT(weekday FROM %s)" % field_name
         if lookup_type == 'year':
