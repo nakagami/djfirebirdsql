@@ -1,7 +1,7 @@
 djfirebirdsql
 ==============
 
-Django firebird database backend.
+Django firebird https://firebirdsql.org/ database backend.
 
 I referrerd django-firebird database backend https://github.com/maxirobaina/django-firebird .
 
