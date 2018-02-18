@@ -264,9 +264,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         table = "'%s'" % table_name.upper()
         field = "'%s'" % field_name.upper()
         cursor.execute("""
-            select s.rdb$index_name,
-                rc.rdb$constraint_type,
-                rc.rdb$constraint_name
+            select trim(s.rdb$index_name), trim(rc.rdb$constraint_name)
             from rdb$index_segments s
             left join rdb$indices i on i.rdb$index_name = s.rdb$index_name
             left join rdb$relation_constraints rc on rc.rdb$index_name = s.rdb$index_name
@@ -274,4 +272,4 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             and s.rdb$field_name = %s
             order by s.rdb$field_position """ % (table, field,))
 
-        return [(i[0].strip(), i[1].strip(), i[2].strip()) for i in cursor.fetchall()]
+        return [(i[0], i[1]) for i in cursor.fetchall()]
