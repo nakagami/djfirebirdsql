@@ -111,6 +111,8 @@ class DatabaseOperations(BaseDatabaseOperations):
             sql = "EXTRACT(year FROM %s)||'-01-01 00:00:00'" % field_name
         elif lookup_type == 'month':
             sql = "EXTRACT(year FROM %s)||'-'||EXTRACT(month FROM %s)||'-01 00:00:00'" % (field_name, field_name)
+        elif lookup_type == 'week':
+            sql = "DATEADD(day, EXTRACT(week FROM %s) * 7 - (EXTRACT(weekday FROM %s) + 1), CAST(EXTRACT(year FROM %s)||'-01-01 00:00:00' AS TIMESTAMP))" % (field_name, field_name, field_name)
         elif lookup_type == 'day':
             sql = "EXTRACT(year FROM %s)||'-'||EXTRACT(month FROM %s)||'-'||EXTRACT(day FROM %s)||' 00:00:00'" % (field_name, field_name, field_name)
         else:
