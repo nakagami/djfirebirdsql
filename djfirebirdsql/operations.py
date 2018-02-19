@@ -109,6 +109,8 @@ class DatabaseOperations(BaseDatabaseOperations):
     def date_trunc_sql(self, lookup_type, field_name):
         if lookup_type == 'year':
             sql = "EXTRACT(year FROM %s)||'-01-01 00:00:00'" % field_name
+        elif lookup_type == 'quarter':
+            sql = "DATEADD(month, (EXTRACT(month FROM %s) -1) / 3 + 1, CAST(EXTRACT(year FROM %s)||'-01-01 00:00:00' AS TIMESTAMP))" % (field_name, field_name)
         elif lookup_type == 'month':
             sql = "EXTRACT(year FROM %s)||'-'||EXTRACT(month FROM %s)||'-01 00:00:00'" % (field_name, field_name)
         elif lookup_type == 'week':
