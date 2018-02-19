@@ -1,5 +1,6 @@
 import uuid
 import datetime
+import pytz
 import firebirdsql as Database
 
 from django.conf import settings
@@ -121,13 +122,22 @@ class DatabaseOperations(BaseDatabaseOperations):
             sql = field_name
         return "CAST(%s AS TIMESTAMP)" % sql
 
+    def _convert_field_to_tz(self, field_name, tzname):
+        if settings.USE_TZ:
+            offset = int(datetime.datetime.now(pytz.timezone(tzname)).utcoffset().total_seconds())
+            field_name = 'DATEADD(SECOND, %d, %s)' % (offset, field_name)
+        return field_name
+
     def datetime_cast_date_sql(self, field_name, tzname):
+        field_name = self._convert_field_to_tz(field_name, tzname)
         return 'CAST(%s AS DATE)' % field_name
 
     def datetime_cast_time_sql(self, field_name, tzname):
+        field_name = self._convert_field_to_tz(field_name, tzname)
         return 'CAST(%s AS TIME)' % field_name
 
     def datetime_extract_sql(self, lookup_type, field_name, tzname):
+        field_name = self._convert_field_to_tz(field_name, tzname)
         if lookup_type == 'week_day':
             sql = "EXTRACT(WEEKDAY FROM %s) + 1" % field_name
         elif lookup_type == 'quarter':
@@ -143,6 +153,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         field_name to a datetime object with only the given specificity, and
         a tuple of parameters.
         """
+        field_name = self._convert_field_to_tz(field_name, tzname)
         year = "EXTRACT(year FROM %s)" % field_name
         month = "EXTRACT(month FROM %s)" % field_name
         day = "EXTRACT(day FROM %s)" % field_name
