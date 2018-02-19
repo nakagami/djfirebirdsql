@@ -392,13 +392,13 @@ class DatabaseOperations(BaseDatabaseOperations):
         return 'DATEADD(%s %s TO %s)' % (value * sign, unit, sql)
 
     def year_lookup_bounds_for_datetime_field(self, value):
-        first = '%s-01-01 00:00:00' % value
-        second = '%s-12-31 23:59:59.9999' % value
+        first = '%04d-01-01 00:00:00' % value
+        second = '%04d-12-31 23:59:59.9999' % value
         return [first, second]
 
     def year_lookup_bounds_for_date_field(self, value):
-        first = '%s-01-01' % value
-        second = '%s-12-31' % value
+        first = '%04d-01-01' % value
+        second = '%04d-12-31' % value
         return [first, second]
 
     def lookup_cast(self, lookup_type, internal_type=None):
