@@ -45,6 +45,11 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         with self.connection.cursor() as cursor:
             return self.connection.introspection._get_field_indexes(cursor, model._meta.db_table, field.column)
 
+    def _create_index_sql(self, model, fields, *, name=None, suffix='', using='',
+                          db_tablespace=None, col_suffixes=(), sql=None):
+        return super()._create_index_sql(model, fields, name=name, suffix=suffix, using=using,
+                          db_tablespace=None, col_suffixes=(), sql=sql)
+
     def alter_field(self, model, old_field, new_field, strict=False):
         old_db_params = old_field.db_parameters(connection=self.connection)
         old_type = old_db_params['type']
