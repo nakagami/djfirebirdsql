@@ -124,7 +124,7 @@ class DatabaseOperations(BaseDatabaseOperations):
 
     def _convert_field_to_tz(self, field_name, tzname):
         if settings.USE_TZ:
-            offset = int(datetime.datetime.now(pytz.timezone(tzname)).utcoffset().total_seconds())
+            offset = int(datetime.datetime.utcnow(pytz.timezone(tzname)).utcoffset().total_seconds())
             field_name = 'DATEADD(SECOND, %d, %s)' % (offset, field_name)
         return field_name
 
