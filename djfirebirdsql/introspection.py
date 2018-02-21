@@ -44,7 +44,13 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         return name.lower()
 
     def sequence_list(self):
-        return []
+        with self.connection.cursor() as cursor:
+            cursor.execute(
+                """SELECT lower(trim(rdb$relation_name)), lower(trim(rdb$field_name))
+                    FROM rdb$relation_fields
+                    WHERE rdb$identity_type is not null
+                    """)
+            return [{'table': r[0], 'column': r[1]} for r in cursor.fetchall()]
 
     def get_table_list(self, cursor):
         "Returns a list of table names in the current database."
