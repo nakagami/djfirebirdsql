@@ -68,7 +68,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
                 else:
                     self.execute(self.sql_delete_index % {'name': index_name})
         super()._alter_field(model, old_field, new_field, old_type, new_type,
-                     old_db_params, new_db_params, strict)
+                     old_db_params, new_db_params)
 
     def delete_model(self, model):
         """Delete a model from the database."""
