@@ -46,6 +46,13 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         with self.connection.cursor() as cursor:
             return self.connection.introspection._get_field_indexes(cursor, model._meta.db_table, field.column)
 
+    def remove_field(self, model, field):
+#        if isinstance(field, AutoField):
+#            pass
+#        for index_name, constraint_name in self._get_field_indexes(model, field):
+#            self.execute(self.sql_delete_index % {'name': index_name})
+        super().remove_field(model, field)
+
     def _create_index_sql(self, model, fields, *, name=None, suffix='', using='',
                           db_tablespace=None, col_suffixes=(), sql=None):
         return super()._create_index_sql(model, fields, name=name, suffix=suffix, using=using,
