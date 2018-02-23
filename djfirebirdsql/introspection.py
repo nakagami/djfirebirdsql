@@ -213,25 +213,22 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
           s.RDB$FIELD_NAME AS field_name,
           i2.RDB$RELATION_NAME AS references_table,
           s2.RDB$FIELD_NAME AS references_field,
-          i.RDB$UNIQUE_FLAG,
-          trg.RDB$TRIGGER_SOURCE check_source
+          i.RDB$UNIQUE_FLAG
         FROM RDB$INDEX_SEGMENTS s
         LEFT JOIN RDB$INDICES i ON i.RDB$INDEX_NAME = s.RDB$INDEX_NAME
         LEFT JOIN RDB$RELATION_CONSTRAINTS rc ON rc.RDB$INDEX_NAME = s.RDB$INDEX_NAME
         LEFT JOIN RDB$REF_CONSTRAINTS refc ON rc.RDB$CONSTRAINT_NAME = refc.RDB$CONSTRAINT_NAME
         LEFT JOIN RDB$RELATION_CONSTRAINTS rc2 ON rc2.RDB$CONSTRAINT_NAME = refc.RDB$CONST_NAME_UQ
-        LEFT JOIN RDB$CHECK_CONSTRAINTS checkc ON checkc.RDB$CONSTRAINT_NAME = refc.RDB$CONSTRAINT_NAME
-        LEFT JOIN RDB$TRIGGERS trg ON checkc.RDB$TRIGGER_NAME = trg.RDB$TRIGGER_NAME
         LEFT JOIN RDB$INDICES i2 ON i2.RDB$INDEX_NAME = rc2.RDB$INDEX_NAME
         LEFT JOIN RDB$INDEX_SEGMENTS s2 ON i2.RDB$INDEX_NAME = s2.RDB$INDEX_NAME
         WHERE i.RDB$RELATION_NAME = %s
         ORDER BY s.RDB$FIELD_POSITION
         """ % (tbl_name,))
-        for constraint_name, constraint_type, column, other_table, other_column, unique, check_source in cursor.fetchall():
+        for constraint_name, constraint_type, column, other_table, other_column, unique in cursor.fetchall():
             primary_key = False
             foreign_key = None
+            check = False
             index = False
-            check = check_source is not None
             constraint = constraint_name.strip()
             constraint_type = constraint_type.strip()
             column = column.strip().lower()
