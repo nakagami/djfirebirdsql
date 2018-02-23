@@ -51,11 +51,8 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         return super()._create_index_sql(model, fields, name=name, suffix=suffix, using=using,
                           db_tablespace=None, col_suffixes=(), sql=sql)
 
-    def alter_field(self, model, old_field, new_field, strict=False):
-        old_db_params = old_field.db_parameters(connection=self.connection)
-        old_type = old_db_params['type']
-        new_db_params = new_field.db_parameters(connection=self.connection)
-        new_type = new_db_params['type']
+    def _alter_field(self, model, old_field, new_field, old_type, new_type,
+                     old_db_params, new_db_params, strict=False):
         if old_type != new_type:
             if old_field.primary_key:
                 self.execute(self.sql_delete_identity % {
@@ -70,7 +67,8 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
                     })
                 else:
                     self.execute(self.sql_delete_index % {'name': index_name})
-        super().alter_field(model, old_field, new_field, strict)
+        super()._alter_field(model, old_field, new_field, old_type, new_type,
+                     old_db_params, new_db_params, strict)
 
     def delete_model(self, model):
         """Delete a model from the database."""

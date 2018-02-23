@@ -3,20 +3,14 @@ Firebird database backend for Django.
 
 Requires firebirdsql: http://github.com/nakagami/pyfirebirdsql
 """
-import re
 import datetime
-import binascii
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django.db import DEFAULT_DB_ALIAS
 from django.db.backends.base.base import BaseDatabaseWrapper
 from django.db.backends import utils
 from django.db.utils import InterfaceError
 from django.utils import timezone
-from django.utils.functional import cached_property
-from django.utils.safestring import SafeText
-from django.utils.version import get_version_tuple
 
 try:
     import firebirdsql as Database
