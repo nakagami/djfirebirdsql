@@ -6,9 +6,8 @@ from django.db.backends.base.introspection import (
     BaseDatabaseIntrospection, FieldInfo, TableInfo,
 )
 
-
-FieldInfo = namedtuple('FieldInfo', 'name type_code display_size internal_size precision scale null_ok default')
-
+FieldInfo = namedtuple('FieldInfo', FieldInfo._fields + ('identity_type',))
+InfoLine = namedtuple('InfoLine', 'col_name data_type max_len num_prec num_scale extra column_default identity_type')
 
 
 class DatabaseIntrospection(BaseDatabaseIntrospection):
@@ -52,6 +51,15 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
                     """)
             return [{'table': r[0], 'column': r[1]} for r in cursor.fetchall()]
 
+    def get_field_type(self, data_type, description):
+        field_type = super().get_field_type(data_type, description)
+        if description.identity_type:
+            if field_type == 'IntegerField':
+                return 'AutoField'
+            elif field_type == 'BigIntegerField':
+                return 'BigAutoField'
+        return field_type
+
     def get_table_list(self, cursor):
         "Returns a list of table names in the current database."
         cursor.execute("""
@@ -92,6 +100,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
               , f.rdb$field_scale * -1
               , rf.rdb$null_flag
               , rf.rdb$default_source
+              , rf.rdb$identity_type
             from
               rdb$relation_fields rf join rdb$fields f on (rf.rdb$field_source = f.rdb$field_name)
             where
@@ -101,8 +110,8 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             """ % (tbl_name,))
         items = []
         for r in cursor.fetchall():
-            # name type_code display_size internal_size precision scale null_ok + default
-            items.append(FieldInfo(r[0], r[1], r[2], r[2] or 0, r[3], r[4], not (r[5] == 1), r[6]))
+            # name type_code display_size internal_size precision scale null_ok, default, identity_type
+            items.append(FieldInfo(r[0], r[1], r[2], r[2] or 0, r[3], r[4], not (r[5] == 1), r[6], r[7]))
         return items
 
     def _name_to_index(self, cursor, table_name):
