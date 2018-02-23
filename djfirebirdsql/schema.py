@@ -66,14 +66,14 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
                     'table': self.quote_name(model._meta.db_table),
                     'column': self.quote_name(old_field.column),
                 })
-            for index_name, constraint_name in self._get_field_indexes(model, old_field):
-                if constraint_name:
-                    self.execute(self.sql_delete_fk % {
-                        'name': self.quote_name(constraint_name),
-                        'table': self.quote_name(model._meta.db_table),
-                    })
-                else:
-                    self.execute(self.sql_delete_index % {'name': index_name})
+#            for index_name, constraint_name in self._get_field_indexes(model, old_field):
+#                if constraint_name:
+#                    self.execute(self.sql_delete_fk % {
+#                        'name': self.quote_name(constraint_name),
+#                        'table': self.quote_name(model._meta.db_table),
+#                    })
+#                else:
+#                    self.execute(self.sql_delete_index % {'name': index_name})
         super()._alter_field(model, old_field, new_field, old_type, new_type,
                      old_db_params, new_db_params)
 
