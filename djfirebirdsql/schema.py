@@ -34,6 +34,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
     sql_rename_column = "ALTER TABLE %(table)s ALTER %(old_column)s TO %(new_column)s"
     sql_create_fk = "ALTER TABLE %(table)s ADD CONSTRAINT %(name)s FOREIGN KEY (%(column)s) REFERENCES %(to_table)s (%(to_column)s) ON DELETE CASCADE"
     sql_delete_fk = "ALTER TABLE %(table)s DROP CONSTRAINT %(name)s"
+    sql_delete_constraint = "ALTER TABLE %(table)s DROP CONSTRAINT %(name)s"
     sql_delete_identity = "ALTER TABLE %(table)s ALTER COLUMN %(column)s DROP IDENTITY"
 
     def quote_value(self, value):
@@ -66,14 +67,12 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
                     'table': self.quote_name(model._meta.db_table),
                     'column': self.quote_name(old_field.column),
                 })
-#            for index_name, constraint_name in self._get_field_indexes(model, old_field):
-#                if constraint_name:
-#                    self.execute(self.sql_delete_fk % {
-#                        'name': self.quote_name(constraint_name),
-#                        'table': self.quote_name(model._meta.db_table),
-#                    })
-#                else:
-#                    self.execute(self.sql_delete_index % {'name': index_name})
+                for _, constraint_name in self._get_field_indexes(model, old_field):
+                    if constraint_name:
+                        self.execute(self.sql_delete_constraint % {
+                            'name': self.quote_name(constraint_name),
+                            'table': self.quote_name(model._meta.db_table),
+                        })
         super()._alter_field(model, old_field, new_field, old_type, new_type,
                      old_db_params, new_db_params)
 
