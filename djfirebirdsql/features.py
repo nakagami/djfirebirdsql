@@ -36,3 +36,4 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_sequence_reset = False
     supports_subqueries_in_group_by = False
     supports_partially_nullable_unique_constraints = False
+    supports_mixed_date_datetime_comparisons = False
