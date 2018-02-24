@@ -60,39 +60,50 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         return super()._create_index_sql(model, fields, name=name, suffix=suffix, using=using,
                           db_tablespace=None, col_suffixes=(), sql=sql)
 
+    def _alter_column_type_sql(self, model, old_field, new_field, new_type):
+        if new_field.get_internal_type() == 'AutoField':
+            new_type = 'integer'
+        elif new_field.get_internal_type() == 'BigAutoField':
+            new_type = 'bigint'
+
+        return (
+            (
+                self.sql_alter_column_type % {
+                    "column": self.quote_name(new_field.column),
+                    "type": new_type,
+                },
+                [],
+            ),
+            [],
+        )
+
     def _alter_field(self, model, old_field, new_field, old_type, new_type,
                      old_db_params, new_db_params, strict=False):
         if old_type != new_type:
-            if (old_field.get_internal_type() == 'AutoField' and
-                new_field.get_internal_type() == 'BigAutoField'):
-                self.execute(self.sql_alter_column_type % {
-                    'type': 'bigint',
-                    'table': self.quote_name(model._meta.db_table),
-                })
-                return
-            elif old_field.get_internal_type() in ('AutoField', 'BigAutoField'):
+            if (old_field.get_internal_type() in ('AutoField', 'BigAutoField')
+                and new_field.get_internal_type() not in ('AutoField', 'BigAutoField')):
                 self.execute(self.sql_delete_identity % {
                     'table': self.quote_name(model._meta.db_table),
                     'column': self.quote_name(old_field.column),
                 })
-                return
-            elif (old_field.get_internal_type() in ('IntegerField', 'BigIntegerField') and
-                new_field.get_internal_type() in ('AutoField', 'BigAutoField')):
-                self.execute(self.sql_add_identity % {
-                    'table': self.quote_name(model._meta.db_table),
-                    'column': self.quote_name(old_field.column),
-                })
-                return
-            if old_field.primary_key:
-                for _, constraint_name in self._get_field_indexes(model, old_field):
-                    if constraint_name:
-                        self.execute(self.sql_delete_constraint % {
-                            'name': self.quote_name(constraint_name),
-                            'table': self.quote_name(model._meta.db_table),
-                        })
+
+#            if old_field.primary_key and not new_field.primary_key:
+#                for _, constraint_name in self._get_field_indexes(model, old_field):
+#                    if constraint_name:
+#                        self.execute(self.sql_delete_constraint % {
+#                            'name': self.quote_name(constraint_name),
+#                            'table': self.quote_name(model._meta.db_table),
+#                        })
 
         super()._alter_field(model, old_field, new_field, old_type, new_type,
                      old_db_params, new_db_params)
+
+        if (old_field.get_internal_type() not in ('AutoField', 'BigAutoField') and
+            new_field.get_internal_type() in ('AutoField', 'BigAutoField')):
+            self.execute(self.sql_add_identity % {
+                'table': self.quote_name(model._meta.db_table),
+                'column': self.quote_name(old_field.column),
+            })
 
     def delete_model(self, model):
         """Delete a model from the database."""
