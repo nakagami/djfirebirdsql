@@ -111,8 +111,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         if lookup_type == 'year':
             sql = "EXTRACT(year FROM %s)||'-01-01 00:00:00'" % field_name
         elif lookup_type == 'quarter':
-            sql = "((EXTRACT(month FROM %s) -1) / 3 + 1)||'-01-01 00:00:00'" % field_name
-
+            sql = "EXTRACT(year FROM %s)||'-'||(EXTRACT(month FROM %s) -1) / 3 + 1||'-01 00:00:00'" % (field_name, field_name)
         elif lookup_type == 'month':
             sql = "EXTRACT(year FROM %s)||'-'||EXTRACT(month FROM %s)||'-01 00:00:00'" % (field_name, field_name)
         elif lookup_type == 'week':
@@ -163,8 +162,11 @@ class DatabaseOperations(BaseDatabaseOperations):
         ss = "EXTRACT(second FROM %s)" % field_name
         yearday = "EXTRACT(yearday FROM %s)" % field_name
         weekday = "EXTRACT(weekday FROM %s)" % field_name
+        quarter = "((EXTRACT(month FROM %s) -1) / 3 + 1)" % field_name
         if lookup_type == 'year':
             sql = "%s||'-01-01 00:00:00'" % year
+        elif lookup_type == 'quarter':
+            sql = "%s||'-'||%s||'-01 00:00:00'" % (year, quarter)
         elif lookup_type == 'month':
             sql = "%s||'-'||%s||'-01 00:00:00'" % (year, month)
         elif lookup_type == 'day':
