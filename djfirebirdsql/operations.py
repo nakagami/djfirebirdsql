@@ -111,7 +111,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         if lookup_type == 'year':
             sql = "EXTRACT(year FROM %s)||'-01-01 00:00:00'" % field_name
         elif lookup_type == 'quarter':
-            sql = "((EXTRACT(month FROM %s) -1) / 3 + 1)||'-01-01 00:00:00'" % (field_name, field_name)
+            sql = "((EXTRACT(month FROM %s) -1) / 3 + 1)||'-01-01 00:00:00'" % field_name
 
         elif lookup_type == 'month':
             sql = "EXTRACT(year FROM %s)||'-'||EXTRACT(month FROM %s)||'-01 00:00:00'" % (field_name, field_name)
