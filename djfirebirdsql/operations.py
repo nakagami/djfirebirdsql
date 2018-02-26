@@ -111,7 +111,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         if lookup_type == 'year':
             sql = "EXTRACT(year FROM %s)||'-01-01 00:00:00'" % field_name
         elif lookup_type == 'quarter':
-            sql = "EXTRACT(year FROM %s)||'-'||(EXTRACT(month FROM %s) -1) / 3 + 1||'-01 00:00:00'" % (field_name, field_name)
+            sql = "EXTRACT(year FROM %s)||'-'||((EXTRACT(MONTH FROM %s) -1) / 3 + 1)||'-01 00:00:00'" % (field_name, field_name)
         elif lookup_type == 'month':
             sql = "EXTRACT(year FROM %s)||'-'||EXTRACT(month FROM %s)||'-01 00:00:00'" % (field_name, field_name)
         elif lookup_type == 'week':
@@ -139,9 +139,9 @@ class DatabaseOperations(BaseDatabaseOperations):
     def datetime_extract_sql(self, lookup_type, field_name, tzname):
         field_name = self._convert_field_to_tz(field_name, tzname)
         if lookup_type == 'week_day':
-            sql = "EXTRACT(WEEKDAY FROM %s) + 1" % field_name
+            sql = "EXTRACT(weekday FROM %s) + 1" % field_name
         elif lookup_type == 'quarter':
-            sql = "((EXTRACT(MONTH FROM %s) - 1) / 3 + 1)" % field_name
+            sql = "((EXTRACT(month FROM %s) - 1) / 3 + 1)" % field_name
         else:
             sql = "EXTRACT(%s FROM %s)" % (lookup_type.upper(), field_name)
         return sql
