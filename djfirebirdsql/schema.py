@@ -60,13 +60,6 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         return super()._create_index_sql(model, fields, name=name, suffix=suffix, using=using,
                           db_tablespace=None, col_suffixes=(), sql=sql)
 
-    def _alter_column_type_sql(self, model, old_field, new_field, new_type):
-        if new_field.get_internal_type() == 'AutoField':
-            new_type = 'integer'
-        elif new_field.get_internal_type() == 'BigAutoField':
-            new_type = 'bigint'
-        return super()._alter_column_type_sql(model, old_field, new_field, new_type)
-
     def _alter_field(self, model, old_field, new_field, old_type, new_type,
                      old_db_params, new_db_params, strict=False):
         if old_type != new_type:
@@ -84,7 +77,14 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
                             'name': self.quote_name(constraint_name),
                             'table': self.quote_name(model._meta.db_table),
                         })
-
+        if old_field.get_internal_type() == 'AutoField':
+            old_type = 'integer'
+        if old_field.get_internal_type() == 'BigAutoField':
+            old_type = 'bigint'
+        if new_field.get_internal_type() == 'AutoField':
+            new_type = 'integer'
+        if new_field.get_internal_type() == 'BigAutoField':
+            new_type = 'bigint'
         super()._alter_field(model, old_field, new_field, old_type, new_type,
                      old_db_params, new_db_params)
 
