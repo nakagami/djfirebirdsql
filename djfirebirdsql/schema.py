@@ -82,6 +82,15 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
 
         if (old_field.get_internal_type() not in ('AutoField', 'BigAutoField') and
             new_field.get_internal_type() in ('AutoField', 'BigAutoField')):
+            self.execute(
+                self.sql_create_pk % {
+                    "table": self.quote_name(model._meta.db_table),
+                    "name": self.quote_name(
+                        self._create_index_name(model._meta.db_table, [new_field.column], suffix="_pk")
+                    ),
+                    "columns": self.quote_name(new_field.column),
+                }
+            )
             self.execute(self.sql_add_identity % {
                 'table': self.quote_name(model._meta.db_table),
                 'column': self.quote_name(old_field.column),
