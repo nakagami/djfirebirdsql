@@ -11,7 +11,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     has_native_uuid_field = False
     has_native_duration_field = False
     supports_column_check_constraints = False
-    uppercases_column_names = True
     supports_regex_backreferencing = False
     has_bulk_insert = False
     can_return_id_from_insert = True
