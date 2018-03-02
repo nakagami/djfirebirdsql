@@ -4,6 +4,7 @@ Firebird database backend for Django.
 Requires firebirdsql: http://github.com/nakagami/pyfirebirdsql
 """
 import datetime
+import collections
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
@@ -184,18 +185,41 @@ class DatabaseWrapper(BaseDatabaseWrapper):
 class FirebirdCursorWrapper(Database.Cursor):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._rows = collections.deque()
         self.closed = False
 
     def execute(self, query, params=None):
         if self.closed:
             raise InterfaceError('Cursor is closed')
-        return super().execute(convert_sql(query, params))
+        super().execute(convert_sql(query, params))
+        self._rows = collections.deque(super().fetchall())
+        if self._transaction._autocommit:
+            self._transaction._connection.commit()
 
     def executemany(self, query, param_list):
         if self.closed:
             raise InterfaceError('Cursor is closed')
         for params in param_list:
             super().execute(convert_sql(query, params))
+
+    def fetchone(self):
+        if len(self._rows):
+            return self._rows.popleft()
+        return None
+
+    def fetchmany(self, size=1):
+        rs = []
+        for i in range(size):
+            r = self.fetchone()
+            if not r:
+                break
+            rs.append(r)
+        return rs
+
+    def fetchall(self):
+        r = list(self._rows)
+        self._rows.clear()
+        return r
 
     def close(self):
         super().close()
