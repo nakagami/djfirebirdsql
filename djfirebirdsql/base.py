@@ -7,7 +7,6 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.db.backends.base.base import BaseDatabaseWrapper
 from django.db.backends import utils
-from django.db.utils import InterfaceError
 
 try:
     import firebirdsql as Database

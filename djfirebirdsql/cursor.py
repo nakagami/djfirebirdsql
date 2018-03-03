@@ -2,6 +2,7 @@ import datetime
 import uuid
 import collections
 from django.utils import timezone
+from django.db.utils import InterfaceError
 
 try:
     import firebirdsql as Database
