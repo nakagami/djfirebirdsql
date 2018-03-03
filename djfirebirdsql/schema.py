@@ -62,39 +62,26 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
 
     def _alter_field(self, model, old_field, new_field, old_type, new_type,
                      old_db_params, new_db_params, strict=False):
-        if old_type != new_type:
-            if (old_field.get_internal_type() in ('AutoField', 'BigAutoField')
-                and new_field.get_internal_type() not in ('AutoField', 'BigAutoField')):
-                self.execute(self.sql_delete_identity % {
-                    'table': self.quote_name(model._meta.db_table),
-                    'column': self.quote_name(old_field.column),
-                })
-
-            for index_name, constraint_name in self._get_field_indexes(model, old_field):
-                if constraint_name:
-                    self.execute(self.sql_delete_constraint % {
-                        'name': self.quote_name(constraint_name),
-                        'table': self.quote_name(model._meta.db_table),
-                    })
+        if (old_field.get_internal_type() in ('AutoField', 'BigAutoField')
+            and new_field.get_internal_type() not in ('AutoField', 'BigAutoField')):
+            self.execute(self.sql_delete_identity % {
+                'table': self.quote_name(model._meta.db_table),
+                'column': self.quote_name(old_field.column),
+            })
 
         super()._alter_field(model, old_field, new_field, old_type, new_type,
                      old_db_params, new_db_params)
 
         if (old_field.get_internal_type() not in ('AutoField', 'BigAutoField') and
             new_field.get_internal_type() in ('AutoField', 'BigAutoField')):
-            self.execute(
-                self.sql_create_pk % {
-                    "table": self.quote_name(model._meta.db_table),
-                    "name": self.quote_name(
-                        self._create_index_name(model._meta.db_table, [new_field.column], suffix="_pk")
-                    ),
-                    "columns": self.quote_name(new_field.column),
-                }
-            )
             self.execute(self.sql_add_identity % {
                 'table': self.quote_name(model._meta.db_table),
                 'column': self.quote_name(old_field.column),
             })
+
+    def remove_field(self, model, field):
+        # TODO:
+        super().remove_field(model, field)
 
     def delete_model(self, model):
         """Delete a model from the database."""
