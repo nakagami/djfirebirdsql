@@ -1,26 +1,11 @@
 import datetime
-import uuid
 
 from django.db.models.fields import AutoField
 from django.db.backends.base.schema import BaseDatabaseSchemaEditor
 from django.db.backends.base.schema import _related_non_m2m_objects
 from django.utils.encoding import force_text
 
-
-def _quote_value(value):
-    import binascii
-    if isinstance(value, (datetime.date, datetime.time, datetime.datetime)):
-        return "'%s'" % value
-    if isinstance(value, uuid.UUID):
-        return "'%s'" % uuid.hex
-    elif isinstance(value, str):
-        return "'%s'" % value.replace("\'", "\'\'")
-    elif isinstance(value, (bytes, bytearray, memoryview)):
-        return "x'%s'" % binascii.hexlify(value).decode('ascii')
-    elif value is None:
-        return "NULL"
-    else:
-        return str(value)
+from .cursor import FirebirdCursorWrapper, _quote_value     # NOQA isort:skip
 
 
 class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
@@ -45,7 +30,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         return self.quote_value(value)
 
     def _get_field_indexes(self, model, field):
-        with self.connection.cursor() as cursor:
+        with self.connection.cursor(factory=FirebirdCursorWrapper) as cursor:
             return self.connection.introspection._get_field_indexes(cursor, model._meta.db_table, field.column)
 
     def _create_index_sql(self, model, fields, *, name=None, suffix='', using='',
@@ -86,10 +71,8 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
     def delete_model(self, model):
         """Delete a model from the database."""
         # delete related foreign key constraints
-        with self.connection.cursor() as cursor:
-            references = self.connection.introspection._get_references(cursor, model._meta.db_table)
-            for r in references:
-                self.execute(self.sql_delete_fk % {'name': r[0], 'table': r[1].upper()})
+        for r in self.connection.introspection._get_references(model._meta.db_table):
+            self.execute(self.sql_delete_fk % {'name': r[0], 'table': r[1].upper()})
         super().delete_model(model)
 
     def _column_has_default(self, params):

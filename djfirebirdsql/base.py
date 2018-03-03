@@ -3,15 +3,11 @@ Firebird database backend for Django.
 
 Requires firebirdsql: http://github.com/nakagami/pyfirebirdsql
 """
-import datetime
-import collections
-
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.db.backends.base.base import BaseDatabaseWrapper
 from django.db.backends import utils
 from django.db.utils import InterfaceError
-from django.utils import timezone
 
 try:
     import firebirdsql as Database
@@ -25,32 +21,7 @@ from .features import DatabaseFeatures                      # NOQA isort:skip
 from .introspection import DatabaseIntrospection            # NOQA isort:skip
 from .operations import DatabaseOperations                  # NOQA isort:skip
 from .schema import DatabaseSchemaEditor                    # NOQA isort:skip
-
-from .schema import _quote_value
-
-
-def convert_sql(query, params):
-    if params is None:
-        pass
-    elif isinstance(params, dict):
-        converted_params = {}
-        for k, v in params.items():
-            if isinstance(v, datetime.datetime) and timezone.is_aware(v):
-                v = v.astimezone(timezone.utc).replace(tzinfo=None)
-            converted_params[k] = _quote_value(v)
-        query = query % converted_params
-    elif isinstance(params, (list, tuple)):
-        converted_params = []
-        for p in params:
-            v = p
-            if isinstance(v, datetime.datetime) and timezone.is_aware(v):
-                v = v.astimezone(timezone.utc).replace(tzinfo=None)
-            converted_params.append(_quote_value(v))
-        if len(converted_params) == 1:
-            query = query % converted_params[0]
-        else:
-            query = query % tuple(converted_params)
-    return query
+from .cursor import FirebirdCursorWrapper, _quote_value     # NOQA isort:skip
 
 
 class DatabaseWrapper(BaseDatabaseWrapper):
@@ -180,47 +151,3 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     def close_if_unusable_or_obsolete(self):
         if self.errors_occurred:
             self.close()
-
-
-class FirebirdCursorWrapper(Database.Cursor):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._rows = collections.deque()
-        self.closed = False
-
-    def execute(self, query, params=None):
-        if self.closed:
-            raise InterfaceError('Cursor is closed')
-        super().execute(convert_sql(query, params))
-        self._rows = collections.deque(super().fetchall())
-        if self._transaction._autocommit:
-            self._transaction._connection.commit()
-
-    def executemany(self, query, param_list):
-        if self.closed:
-            raise InterfaceError('Cursor is closed')
-        for params in param_list:
-            super().execute(convert_sql(query, params))
-
-    def fetchone(self):
-        if len(self._rows):
-            return self._rows.popleft()
-        return None
-
-    def fetchmany(self, size=1):
-        rs = []
-        for i in range(size):
-            r = self.fetchone()
-            if not r:
-                break
-            rs.append(r)
-        return rs
-
-    def fetchall(self):
-        r = list(self._rows)
-        self._rows.clear()
-        return r
-
-    def close(self):
-        super().close()
-        self.closed = True

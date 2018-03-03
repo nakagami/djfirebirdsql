@@ -43,7 +43,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         return name.lower()
 
     def sequence_list(self):
-        with self.connection.cursor() as cursor:
+        with self.connection.create_cursor() as cursor:
             cursor.execute(
                 """SELECT lower(trim(rdb$relation_name)), lower(trim(rdb$field_name))
                     FROM rdb$relation_fields
@@ -120,34 +120,29 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         """
         return dict([(d[0], i) for i, d in enumerate(self.get_table_description(cursor, table_name))])
 
-    def _get_references(self, cursor, table_name):
+    def _get_references(self, table_name):
         """
         Foreign Key constraint reference.
         constraint name, table, column, referenecd table, referenced column
         table_name: refernced tbale name
         """
-        tbl_name = "'%s'" % table_name.upper()
-        references = []
-        cursor.execute("""
-            select
-                lower(refc.rdb$constraint_name) as constraint_name,
-                lower(i.rdb$relation_name) as table_name,
-                lower(s.rdb$field_name) as column_name,
-                lower(i2.rdb$relation_name) as referenced_table_name,
-                lower(s2.rdb$field_name) as referenced_column_name
-            from rdb$index_segments s
-            left join rdb$indices i on i.rdb$index_name = s.rdb$index_name
-            left join rdb$relation_constraints rc on rc.rdb$index_name = s.rdb$index_name
-            left join rdb$ref_constraints refc on rc.rdb$constraint_name = refc.rdb$constraint_name
-            left join rdb$relation_constraints rc2 on rc2.rdb$constraint_name = refc.rdb$const_name_uq
-            left join rdb$indices i2 on i2.rdb$index_name = rc2.rdb$index_name
-            left join rdb$index_segments s2 on i2.rdb$index_name = s2.rdb$index_name
-            WHERE RC.RDB$CONSTRAINT_TYPE = 'FOREIGN KEY'
-            and upper(i2.rdb$relation_name) = %s """ % (tbl_name,))
-
-        for r in cursor.fetchall():
-            references.append((r[0].strip(), r[1].strip(), r[2].strip(), r[3].strip(), r[4].strip()))
-        return references
+        with self.connection.create_cursor() as cursor:
+            tbl_name = "'%s'" % table_name.upper()
+            references = []
+            cursor.execute("""
+                select
+                    refc.rdb$constraint_name,
+                    i.rdb$relation_name
+                from rdb$index_segments s
+                left join rdb$indices i on i.rdb$index_name = s.rdb$index_name
+                left join rdb$relation_constraints rc on rc.rdb$index_name = s.rdb$index_name
+                left join rdb$ref_constraints refc on rc.rdb$constraint_name = refc.rdb$constraint_name
+                left join rdb$relation_constraints rc2 on rc2.rdb$constraint_name = refc.rdb$const_name_uq
+                left join rdb$indices i2 on i2.rdb$index_name = rc2.rdb$index_name
+                left join rdb$index_segments s2 on i2.rdb$index_name = s2.rdb$index_name
+                WHERE RC.RDB$CONSTRAINT_TYPE = 'FOREIGN KEY'
+                and upper(i2.rdb$relation_name) = %s """ % (tbl_name,))
+            return [(r[0].strip(), r[1].strip()) for r in cursor.fetchall()]
 
     def get_key_columns(self, cursor, table_name):
         """
