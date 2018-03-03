@@ -43,7 +43,8 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         return name.lower()
 
     def sequence_list(self):
-        with self.connection.create_cursor() as cursor:
+        print(type(self.connection))
+        with self.connection.cursor() as cursor:
             cursor.execute(
                 """SELECT lower(trim(rdb$relation_name)), lower(trim(rdb$field_name))
                     FROM rdb$relation_fields
@@ -126,7 +127,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         constraint name, table, column, referenecd table, referenced column
         table_name: refernced tbale name
         """
-        with self.connection.create_cursor() as cursor:
+        with self.connection.cursor() as cursor:
             tbl_name = "'%s'" % table_name.upper()
             references = []
             cursor.execute("""
@@ -271,7 +272,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         """
           Return a list of index (index_name, type, constraint_name)
         """
-        with self.connection.create_cursor() as cursor:
+        with self.connection.cursor() as cursor:
 
             table = "'%s'" % table_name.upper()
             field = "'%s'" % field_name.upper()
