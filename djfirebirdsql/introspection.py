@@ -267,22 +267,24 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             raise ValueError("'%s' is not found." % table_name)
         return constraints
 
-    def _get_field_indexes(self, cursor, table_name, field_name):
+    def _get_field_indexes(self, table_name, field_name):
         """
           Return a list of index (index_name, type, constraint_name)
         """
-        table = "'%s'" % table_name.upper()
-        field = "'%s'" % field_name.upper()
-        cursor.execute("""
-            select
-                trim(s.rdb$index_name),
-                trim(rc.rdb$constraint_name),
-                trim(rc.rdb$constraint_type)
-            from rdb$index_segments s
-            left join rdb$indices i on i.rdb$index_name = s.rdb$index_name
-            left join rdb$relation_constraints rc on rc.rdb$index_name = s.rdb$index_name
-            where i.rdb$relation_name = %s
-            and s.rdb$field_name = %s
-            order by s.rdb$field_position """ % (table, field,))
+        with self.connection.create_cursor() as cursor:
 
-        return [(i[0], i[1], i[2]) for i in cursor.fetchall()]
+            table = "'%s'" % table_name.upper()
+            field = "'%s'" % field_name.upper()
+            cursor.execute("""
+                select
+                    trim(s.rdb$index_name),
+                    trim(rc.rdb$constraint_name),
+                    trim(rc.rdb$constraint_type)
+                from rdb$index_segments s
+                left join rdb$indices i on i.rdb$index_name = s.rdb$index_name
+                left join rdb$relation_constraints rc on rc.rdb$index_name = s.rdb$index_name
+                where i.rdb$relation_name = %s
+                and s.rdb$field_name = %s
+                order by s.rdb$field_position """ % (table, field,))
+    
+            return [(i[0], i[1], i[2]) for i in cursor.fetchall()]
