@@ -43,7 +43,6 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         return name.lower()
 
     def sequence_list(self):
-        print(type(self.connection))
         with self.connection.cursor() as cursor:
             cursor.execute(
                 """SELECT lower(trim(rdb$relation_name)), lower(trim(rdb$field_name))
