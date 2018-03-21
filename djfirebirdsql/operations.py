@@ -79,7 +79,9 @@ class DatabaseOperations(BaseDatabaseOperations):
     def check_expression_support(self, expression):
         from django.db.models.aggregates import Avg
         from django.db.models.expressions import Value
-        from django.db.models.functions import Greatest, Least, Length
+        from django.db.models.functions import (
+            Greatest, Least, Length, Chr, LTrim, RTrim, Ord
+        )
 
         if isinstance(expression, Avg):
             expression.template = '%(function)s(CAST(%(expressions)s as double precision))'
@@ -89,6 +91,14 @@ class DatabaseOperations(BaseDatabaseOperations):
             expression.template = 'MINVALUE(%(expressions)s)'
         elif isinstance(expression, Length):
             expression.template = 'CHARACTER_LENGTH(%(expressions)s)'
+        elif isinstance(expression, Chr):
+            expression.template = 'ASCII_CHAR(%(expressions)s)'
+        elif isinstance(expression, LTrim):
+            expression.template = 'TRIM(LEADING FROM %(expressions)s)'
+        elif isinstance(expression, RTrim):
+            expression.template = 'TRIM(TRAILING FROM %(expressions)s)'
+        elif isinstance(expression, Ord):
+            expression.template = 'ASCII_VAL(%(expressions)s)'
         elif isinstance(expression, Value):
             if isinstance(expression.value, datetime.datetime):
                 expression.value = str(expression.value)[:24]
