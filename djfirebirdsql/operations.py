@@ -86,19 +86,19 @@ class DatabaseOperations(BaseDatabaseOperations):
         if isinstance(expression, Avg):
             expression.template = '%(function)s(CAST(%(expressions)s as double precision))'
         elif isinstance(expression, Greatest):
-            expression.template = 'MAXVALUE(%(expressions)s)'
+            expression.function = 'MAXVALUE'
         elif isinstance(expression, Least):
-            expression.template = 'MINVALUE(%(expressions)s)'
+            expression.function = 'MINVALUe'
         elif isinstance(expression, Length):
-            expression.template = 'CHARACTER_LENGTH(%(expressions)s)'
+            expression.function = 'CHARACTER_LENGTH'
         elif isinstance(expression, Chr):
-            expression.template = 'ASCII_CHAR(%(expressions)s)'
+            expression.function = 'ASCII_CHAR'
         elif isinstance(expression, LTrim):
             expression.template = 'TRIM(LEADING FROM %(expressions)s)'
         elif isinstance(expression, RTrim):
             expression.template = 'TRIM(TRAILING FROM %(expressions)s)'
         elif isinstance(expression, Ord):
-            expression.template = 'ASCII_VAL(%(expressions)s)'
+            expression.function = 'ASCII_VAL'
         elif isinstance(expression, Value):
             if isinstance(expression.value, datetime.datetime):
                 expression.value = str(expression.value)[:24]
