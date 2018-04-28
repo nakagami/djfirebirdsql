@@ -9,7 +9,7 @@ from django.db.backends.base.operations import BaseDatabaseOperations
 from django.utils import timezone
 from django.utils.encoding import force_text
 from django.db.utils import DatabaseError
-from django.db.models.functions import ConcatPair, Substr, StrIndex
+from django.db.models.functions import ConcatPair, Substr, StrIndex, Repeat
 
 
 def _substr_as_sql(self, compiler, connection, function=None, template=None, arg_joiner=None, **extra_context):
@@ -51,6 +51,7 @@ def _str_index_as_sql(self, compiler, connection, function=None, template=None, 
 ConcatPair.as_sql = ConcatPair.as_sqlite
 Substr.as_sql = _substr_as_sql
 StrIndex.as_sql = _str_index_as_sql
+Repeat.as_sql = Repeat.as_oracle
 
 class DatabaseOperations(BaseDatabaseOperations):
     cast_char_field_without_max_length = 'varchar(8191)'
