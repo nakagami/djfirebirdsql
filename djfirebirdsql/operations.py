@@ -48,10 +48,10 @@ def _str_index_as_sql(self, compiler, connection, function=None, template=None, 
     return template % data, params
 
 
-ConcatPair.as_sql = ConcatPair.as_sqlite
-Substr.as_sql = _substr_as_sql
-StrIndex.as_sql = _str_index_as_sql
-Repeat.as_sql = Repeat.as_oracle
+ConcatPair.as_firebirdsql = ConcatPair.as_sqlite
+Substr.as_firebirdsql = _substr_as_sql
+StrIndex.as_firebirdsql = _str_index_as_sql
+Repeat.as_firebirdsql = Repeat.as_oracle
 
 class DatabaseOperations(BaseDatabaseOperations):
     cast_char_field_without_max_length = 'varchar(8191)'
