@@ -71,13 +71,6 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
                         'table': self.quote_name(model._meta.db_table),
                         'column': self.quote_name(old_field.column),
                     })
-        elif (old_field.primary_key or old_field.unique) and not (new_field.unique or new_field.primary_key):
-            for index_name, constraint_name, constraint_type in self._get_field_indexes(model, old_field):
-                if constraint_name in ('PRIMARY KEY', 'UNIQUE'):
-                    self.execute(self.sql_delete_constraint % {
-                        'name': self.quote_name(constraint_name),
-                        'table': self.quote_name(model._meta.db_table),
-                    })
 
         super()._alter_field(model, old_field, new_field, old_type, new_type,
                      old_db_params, new_db_params)
