@@ -14,7 +14,7 @@ def _quote_value(value):
     if isinstance(value, (datetime.date, datetime.time, datetime.datetime)):
         return "'%s'" % value
     if isinstance(value, uuid.UUID):
-        return "'%s'" % uuid.hex
+        return "'%s'" % uuid.hex(value)
     elif isinstance(value, str):
         return "'%s'" % value.replace("\'", "\'\'")
     elif isinstance(value, (bytes, bytearray, memoryview)):
