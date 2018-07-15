@@ -19,7 +19,6 @@ DATABASES = {
         'HOST': 'localhost',
         'USER': 'sysdba',
         'PASSWORD': 'masterkey',
-        'AUTOCOMMIT': True,
     },
     'other': {
         'ENGINE': 'djfirebirdsql',
@@ -27,7 +26,6 @@ DATABASES = {
         'HOST': 'localhost',
         'USER': 'sysdba',
         'PASSWORD': 'masterkey',
-        'AUTOCOMMIT': True,
     }
 }
 

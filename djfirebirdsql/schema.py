@@ -35,9 +35,9 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         return self.connection.introspection._get_field_indexes(model._meta.db_table, field.column)
 
     def _create_index_sql(self, model, fields, *, name=None, suffix='', using='',
-                          db_tablespace=None, col_suffixes=(), sql=None):
+                          db_tablespace=None, col_suffixes=(), sql=None, opclasses=()):
         return super()._create_index_sql(model, fields, name=name, suffix=suffix, using=using,
-                          db_tablespace=None, col_suffixes=(), sql=sql)
+                          db_tablespace=None, col_suffixes=(), sql=sql, opclasses=opclasses)
 
     def _alter_column_type_sql(self, model, old_field, new_field, new_type):
         if new_field.get_internal_type() == 'AutoField':
@@ -70,13 +70,6 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
                         'name': self.quote_name(constraint_name),
                         'table': self.quote_name(model._meta.db_table),
                         'column': self.quote_name(old_field.column),
-                    })
-        elif (old_field.primary_key or old_field.unique) and not (new_field.unique or new_field.primary_key):
-            for index_name, constraint_name, constraint_type in self._get_field_indexes(model, old_field):
-                if constraint_name in ('PRIMARY KEY', 'UNIQUE'):
-                    self.execute(self.sql_delete_constraint % {
-                        'name': self.quote_name(constraint_name),
-                        'table': self.quote_name(model._meta.db_table),
                     })
 
         super()._alter_field(model, old_field, new_field, old_type, new_type,
