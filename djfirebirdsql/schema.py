@@ -34,11 +34,6 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
     def _get_field_indexes(self, model, field):
         return self.connection.introspection._get_field_indexes(model._meta.db_table, field.column)
 
-    def _create_index_sql(self, model, fields, *, name=None, suffix='', using='',
-                          db_tablespace=None, col_suffixes=(), sql=None):
-        return super()._create_index_sql(model, fields, name=name, suffix=suffix, using=using,
-                          db_tablespace=None, col_suffixes=(), sql=sql)
-
     def _alter_column_type_sql(self, model, old_field, new_field, new_type):
         if new_field.get_internal_type() == 'AutoField':
             new_type = 'integer'
