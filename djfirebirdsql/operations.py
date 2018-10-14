@@ -194,6 +194,12 @@ class DatabaseOperations(BaseDatabaseOperations):
         return "CAST(%s AS TIMESTAMP)" % sql
 
     def time_trunc_sql(self, lookup_type, field_name):
+        fields = {
+            'hour': '%%H:00:00',
+            'minute': '%%H:%%i:00',
+            'second': '%%H:%%i:%%s',
+        }  # Use double percents to escape.
+
         if lookup_type in fields:
             if lookup_type == 'hour':
                 s = "EXTRACT(hour FROM %s)||':00:00'" % (field_name,)

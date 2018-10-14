@@ -13,7 +13,7 @@ def _quote_value(value):
     import binascii
     if isinstance(value, (datetime.date, datetime.time, datetime.datetime)):
         return "'%s'" % value
-    if isinstance(value, uuid.UUID):
+    elif isinstance(value, uuid.UUID):
         return "'%s'" % value.hex
     elif isinstance(value, str):
         return "'%s'" % value.replace("\'", "\'\'")
