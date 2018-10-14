@@ -9,7 +9,9 @@ from django.db.backends.base.operations import BaseDatabaseOperations
 from django.utils import timezone
 from django.utils.encoding import force_text
 from django.db.utils import DatabaseError
-from django.db.models.functions import ConcatPair, Substr, StrIndex, Repeat, Degrees
+from django.db.models.functions import (
+    ConcatPair, Substr, StrIndex, Repeat, Degrees, Radians
+)
 
 
 def _substr_as_sql(self, compiler, connection, function=None, template=None, arg_joiner=None, **extra_context):
@@ -52,7 +54,8 @@ ConcatPair.as_firebirdsql = ConcatPair.as_sqlite
 Substr.as_firebirdsql = _substr_as_sql
 StrIndex.as_firebirdsql = _str_index_as_sql
 Repeat.as_firebirdsql = Repeat.as_oracle
-Degrees.as_firebird = Degrees.as_oracle
+Degrees.as_firebirdsql = Degrees.as_oracle
+Radians.as_firebirdsql = Radians.as_oracle
 
 class DatabaseOperations(BaseDatabaseOperations):
     cast_char_field_without_max_length = 'varchar(8191)'
