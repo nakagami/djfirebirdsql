@@ -65,6 +65,11 @@ class DatabaseOperations(BaseDatabaseOperations):
         'PositiveIntegerField': (0, 2147483647),
     }
 
+    cast_data_types = {
+        'AutoField': 'integer',
+        'BigAutoField': 'bigint',
+    }
+
     def cache_key_culling_sql(self):
         return """
             SELECT cache_key
