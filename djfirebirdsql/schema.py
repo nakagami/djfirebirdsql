@@ -109,3 +109,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
 
         # Return the sql
         return sql
+
+    def _index_columns(self, table, columns, col_suffixes, opclasses):
+        return super()._index_columns(table, columns, [], opclasses)
+
