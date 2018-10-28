@@ -1,8 +1,4 @@
-import datetime
-
 from django.db.backends.base.schema import BaseDatabaseSchemaEditor
-from django.utils.encoding import force_text
-
 from .cursor import FirebirdCursorWrapper, _quote_value     # NOQA isort:skip
 
 
