@@ -1,8 +1,6 @@
 import datetime
 
-from django.db.models.fields import AutoField
 from django.db.backends.base.schema import BaseDatabaseSchemaEditor
-from django.db.backends.base.schema import _related_non_m2m_objects
 from django.utils.encoding import force_text
 
 from .cursor import FirebirdCursorWrapper, _quote_value     # NOQA isort:skip
