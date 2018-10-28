@@ -1,6 +1,7 @@
 import uuid
 import datetime
 import pytz
+import math
 import firebirdsql as Database
 
 from django.conf import settings
@@ -54,7 +55,6 @@ ConcatPair.as_firebirdsql = ConcatPair.as_sqlite
 Substr.as_firebirdsql = _substr_as_sql
 StrIndex.as_firebirdsql = _str_index_as_sql
 Repeat.as_firebirdsql = Repeat.as_oracle
-Degrees.as_firebirdsql = Degrees.as_oracle
 Radians.as_firebirdsql = Radians.as_oracle
 
 class DatabaseOperations(BaseDatabaseOperations):
@@ -109,6 +109,8 @@ class DatabaseOperations(BaseDatabaseOperations):
             expression.template = 'TRIM(TRAILING FROM %(expressions)s)'
         elif isinstance(expression, Ord):
             expression.function = 'ASCII_VAL'
+        elif isinstance(expression, Degrees):
+            expression.template='(Cast(%%(expressions)s AS DOUBLE PRECISION) * 180 / %s)' % math.pi
         elif isinstance(expression, Value):
             if isinstance(expression.value, datetime.datetime):
                 expression.value = str(expression.value)[:24]
