@@ -129,9 +129,21 @@ class DatabaseOperations(BaseDatabaseOperations):
         """Do nothing since formatting is handled in the custom function."""
         return sql
 
+    def _iso8601_timestamp(self, field_name):
+        return """
+            (extract(year from ts) ||
+            '-' || lpad(extract(month from {ts}), 2, '0') ||
+            '-' || lpad(extract(day from {ts}), 2, '0') ||
+            'T' || lpad(extract(hour from {ts}), 2, '0') ||
+            ':' || lpad(extract(minute from {ts}), 2, '0') ||
+            ':' || lpad(extract(second from {ts}), 2, '0'))
+            """.format(ts=field_name)
+
     def date_trunc_sql(self, lookup_type, field_name):
         if lookup_type == 'year':
             sql = "EXTRACT(year FROM %s)||'-01-01 00:00:00'" % field_name
+        elif lookup_type == 'iso_year':
+            sql = "EXTRACT(year FROM %s)||'-01-01 00:00:00'" % self._iso8601_timestamp(field_name)
         elif lookup_type == 'quarter':
             sql = "EXTRACT(year FROM %s)||'-'||((EXTRACT(MONTH FROM %s) -1) / 3 * 3 + 1)||'-01 00:00:00'" % (field_name, field_name)
         elif lookup_type == 'month':
@@ -177,6 +189,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         """
         field_name = self._convert_field_to_tz(field_name, tzname)
         year = "EXTRACT(year FROM %s)" % field_name
+        iso_year = "EXTRACT(year FROM %s)" % self._iso8601_timestamp(field_name)
         month = "EXTRACT(month FROM %s)" % field_name
         day = "EXTRACT(day FROM %s)" % field_name
         hh = "EXTRACT(hour FROM %s)" % field_name
@@ -187,6 +200,8 @@ class DatabaseOperations(BaseDatabaseOperations):
         quarter = "((EXTRACT(month FROM %s) -1) / 3 * 3 + 1)" % field_name
         if lookup_type == 'year':
             sql = "%s||'-01-01 00:00:00'" % year
+        elif lookup_type == 'iso_year':
+            sql = "%s||'-01-01 00:00:00'" % iso_year
         elif lookup_type == 'quarter':
             sql = "%s||'-'||%s||'-01 00:00:00'" % (year, quarter)
         elif lookup_type == 'month':
