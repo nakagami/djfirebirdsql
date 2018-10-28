@@ -115,9 +115,21 @@ class DatabaseOperations(BaseDatabaseOperations):
             if isinstance(expression.value, datetime.datetime):
                 expression.value = str(expression.value)[:24]
 
+    def _iso8601_timestamp(self, field_name):
+        return """
+            (extract(year from ts) ||
+            '-' || lpad(extract(month from {ts}), 2, '0') ||
+            '-' || lpad(extract(day from {ts}), 2, '0') ||
+            'T' || lpad(extract(hour from {ts}), 2, '0') ||
+            ':' || lpad(extract(minute from {ts}), 2, '0') ||
+            ':' || lpad(extract(second from {ts}), 2, '0'))
+            """.format(ts=field_name)
+
     def date_extract_sql(self, lookup_type, field_name):
-        if lookup_type == 'week_day':
-            return "EXTRACT(WEEKDAY FROM %s) + 1" % field_name
+        if lookup_type == 'iso_year':
+            return "EXTRACT(YEAR FROM %s)" % self._iso8601_timestamp(field_name)
+        elif lookup_type == 'week_day':
+            return "(EXTRACT(WEEKDAY FROM %s) + 1)" % field_name
         elif lookup_type == 'quarter':
             return "((EXTRACT(MONTH FROM %s) - 1) / 3 + 1)" % field_name
         return "EXTRACT(%s FROM %s)" % (lookup_type.upper(), field_name)
@@ -128,16 +140,6 @@ class DatabaseOperations(BaseDatabaseOperations):
     def format_for_duration_arithmetic(self, sql):
         """Do nothing since formatting is handled in the custom function."""
         return sql
-
-    def _iso8601_timestamp(self, field_name):
-        return """
-            (extract(year from ts) ||
-            '-' || lpad(extract(month from {ts}), 2, '0') ||
-            '-' || lpad(extract(day from {ts}), 2, '0') ||
-            'T' || lpad(extract(hour from {ts}), 2, '0') ||
-            ':' || lpad(extract(minute from {ts}), 2, '0') ||
-            ':' || lpad(extract(second from {ts}), 2, '0'))
-            """.format(ts=field_name)
 
     def date_trunc_sql(self, lookup_type, field_name):
         if lookup_type == 'year':
