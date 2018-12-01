@@ -115,24 +115,14 @@ class DatabaseOperations(BaseDatabaseOperations):
             if isinstance(expression.value, datetime.datetime):
                 expression.value = str(expression.value)[:24]
 
-    def _iso8601_timestamp(self, field_name):
-        return """
-            (extract(year from ts) ||
-            '-' || lpad(extract(month from {ts}), 2, '0') ||
-            '-' || lpad(extract(day from {ts}), 2, '0') ||
-            'T' || lpad(extract(hour from {ts}), 2, '0') ||
-            ':' || lpad(extract(minute from {ts}), 2, '0') ||
-            ':' || lpad(extract(second from {ts}), 2, '0'))
-            """.format(ts=field_name)
-
     def date_extract_sql(self, lookup_type, field_name):
         if lookup_type == 'iso_year':
-            return "EXTRACT(YEAR FROM %s)" % self._iso8601_timestamp(field_name)
+            return "EXTRACT(YEAR FROM %s)" % field_name
         elif lookup_type == 'week_day':
             return "(EXTRACT(WEEKDAY FROM %s) + 1)" % field_name
         elif lookup_type == 'quarter':
             return "((EXTRACT(MONTH FROM %s) - 1) / 3 + 1)" % field_name
-        return "EXTRACT(%s FROM %s)" % (lookup_type.upper(), field_name)
+        return "EXTRACT(%s FROM %s)" % (lookup_type, field_name)
 
     def date_interval_sql(self, timedelta):
         return timedelta
@@ -145,7 +135,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         if lookup_type == 'year':
             sql = "EXTRACT(year FROM %s)||'-01-01 00:00:00'" % field_name
         elif lookup_type == 'iso_year':
-            sql = "EXTRACT(year FROM %s)||'-01-01 00:00:00'" % self._iso8601_timestamp(field_name)
+            sql = "EXTRACT(year FROM %s)||'-01-01 00:00:00'" % field_name
         elif lookup_type == 'quarter':
             sql = "EXTRACT(year FROM %s)||'-'||((EXTRACT(MONTH FROM %s) -1) / 3 * 3 + 1)||'-01 00:00:00'" % (field_name, field_name)
         elif lookup_type == 'month':
@@ -174,12 +164,14 @@ class DatabaseOperations(BaseDatabaseOperations):
 
     def datetime_extract_sql(self, lookup_type, field_name, tzname):
         field_name = self._convert_field_to_tz(field_name, tzname)
-        if lookup_type == 'week_day':
+        if lookup_type == 'iso_year':
+            sql = "EXTRACT(year FROM %s)" % field_name
+        elif lookup_type == 'week_day':
             sql = "EXTRACT(weekday FROM %s) + 1" % field_name
         elif lookup_type == 'quarter':
             sql = "((EXTRACT(month FROM %s) - 1) / 3 + 1)" % field_name
         else:
-            sql = "EXTRACT(%s FROM %s)" % (lookup_type.upper(), field_name)
+            sql = "EXTRACT(%s FROM %s)" % (lookup_type, field_name)
         return sql
 
     def datetime_trunc_sql(self, lookup_type, field_name, tzname):
@@ -191,7 +183,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         """
         field_name = self._convert_field_to_tz(field_name, tzname)
         year = "EXTRACT(year FROM %s)" % field_name
-        iso_year = "EXTRACT(year FROM %s)" % self._iso8601_timestamp(field_name)
+        iso_year = "EXTRACT(year FROM %s)" % field_name
         month = "EXTRACT(month FROM %s)" % field_name
         day = "EXTRACT(day FROM %s)" % field_name
         hh = "EXTRACT(hour FROM %s)" % field_name
