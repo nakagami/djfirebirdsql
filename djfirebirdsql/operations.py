@@ -315,54 +315,10 @@ class DatabaseOperations(BaseDatabaseOperations):
         return x
 
     def adapt_datetimefield_value(self, value):
-        """
-        Transform a datetime value to an object compatible with what is expected
-        by the backend driver for datetime columns.
-        """
-        if value is None:
-            return None
-
-        # Expression values are adapted by the database.
-        if hasattr(value, 'resolve_expression'):
-            return value
-
-        # Firebird doesn't support tz-aware datetimes
-        if timezone.is_aware(value):
-            if settings.USE_TZ:
-                value = timezone.make_naive(value, self.connection.timezone)
-            else:
-                raise ValueError("Firebird backend does not support timezone-aware datetimes when USE_TZ is False.")
-
-        # Replaces 6 digits microseconds to 4 digits allowed in Firebird
-        if isinstance(value, datetime.datetime):
-            value = datetime.datetime(
-                year=value.year,
-                month=value.month,
-                day=value.day,
-                hour=value.hour,
-                minute=value.minute,
-                second=value.second,
-                microsecond=(value.microsecond //100) * 100
-            )
-        return force_text(value)[:24]
+        return value
 
     def adapt_timefield_value(self, value):
-        if value is None:
-            return None
-
-        # Expression values are adapted by the database.
-        if hasattr(value, 'resolve_expression'):
-            return value
-
-        # Firebird doesn't support tz-aware times
-        if timezone.is_aware(value):
-            raise ValueError("Firebird backend does not support timezone-aware times.")
-        # Replaces 6 digits microseconds to 4 digits allowed in Firebird
-        if isinstance(value, datetime.time):
-            value = str(value)
-        if isinstance(value, str):
-            value = value[:13]
-        return force_text(value)
+        return value
 
     def combine_expression(self, connector, sub_expressions):
         lhs, rhs = sub_expressions
