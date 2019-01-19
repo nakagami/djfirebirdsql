@@ -10,6 +10,7 @@ from django.db.backends.base.operations import BaseDatabaseOperations
 from django.utils import timezone
 from django.utils.encoding import force_text
 from django.db.utils import DatabaseError
+from django.db.models import Case
 from django.db.models.functions import (
     ConcatPair, Substr, StrIndex, Repeat, Degrees, Radians
 )
@@ -111,6 +112,8 @@ class DatabaseOperations(BaseDatabaseOperations):
             expression.function = 'ASCII_VAL'
         elif isinstance(expression, Degrees):
             expression.template='(Cast(%%(expressions)s AS DOUBLE PRECISION) * 180 / %s)' % math.pi
+        elif isinstance(expression, Case):
+            expression.template = 'TRIM(CASE %(cases)s ELSE %(default)s END)'
         elif isinstance(expression, Value):
             if isinstance(expression.value, datetime.datetime):
                 expression.value = str(expression.value)[:24]
