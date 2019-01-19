@@ -38,3 +38,4 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_mixed_date_datetime_comparisons = False
     can_introspect_autofield = True
     can_introspect_duration_field = False
+    supports_partial_indexes = False
