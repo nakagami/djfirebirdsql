@@ -39,5 +39,4 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     can_introspect_autofield = True
     can_introspect_duration_field = False
     supports_partial_indexes = False
-    requires_casted_case_in_updates = True
     supports_over_clause = True

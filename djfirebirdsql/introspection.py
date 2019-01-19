@@ -45,9 +45,10 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
     def sequence_list(self):
         with self.connection.cursor() as cursor:
             cursor.execute(
-                """SELECT lower(trim(rdb$relation_name)), lower(trim(rdb$field_name))
-                    FROM rdb$relation_fields
-                    WHERE rdb$identity_type is not null
+                """select lower(trim(rdb$relation_name)),
+                          lower(trim(rdb$field_name))
+                    from rdb$relation_fields
+                    where rdb$identity_type is not null
                     """)
             return [{'table': r[0], 'column': r[1]} for r in cursor.fetchall()]
 
@@ -69,7 +70,6 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             from rdb$relations
             where rdb$system_flag=0
             order by 1 """)
-        # return [r[0].strip().lower() for r in cursor.fetchall()]
         return [TableInfo(row[0], row[1]) for row in cursor.fetchall()]
 
     def get_table_description(self, cursor, table_name):
@@ -131,8 +131,8 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             references = []
             cursor.execute("""
                 select
-                    refc.rdb$constraint_name,
-                    i.rdb$relation_name
+                    lower(refc.rdb$constraint_name),
+                    lower(i.rdb$relation_name)
                 from rdb$index_segments s
                 left join rdb$indices i on i.rdb$index_name = s.rdb$index_name
                 left join rdb$relation_constraints rc on rc.rdb$index_name = s.rdb$index_name
@@ -205,8 +205,8 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         cursor.execute("""
         SELECT
           case
-            when rc.RDB$CONSTRAINT_NAME is not null then rc.RDB$CONSTRAINT_NAME
-            else i.RDB$INDEX_NAME
+            when rc.RDB$CONSTRAINT_NAME is not null then lower(rc.RDB$CONSTRAINT_NAME)
+            else lower(i.RDB$INDEX_NAME)
           end as constraint_name,
 
           case
@@ -277,8 +277,8 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             field = "'%s'" % field_name.upper()
             cursor.execute("""
                 select
-                    trim(s.rdb$index_name),
-                    trim(rc.rdb$constraint_name),
+                    lower(trim(s.rdb$index_name)),
+                    lower(trim(rc.rdb$constraint_name)),
                     trim(rc.rdb$constraint_type)
                 from rdb$index_segments s
                 left join rdb$indices i on i.rdb$index_name = s.rdb$index_name
