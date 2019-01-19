@@ -80,12 +80,6 @@ class DatabaseOperations(BaseDatabaseOperations):
              WHERE rank = %%s + 1
         """
 
-    def unification_cast_sql(self, output_field):
-        internal_type = output_field.get_internal_type()
-        if internal_type in ("GenericIPAddressField", "IPAddressField", "TimeField", "UUIDField"):
-            return 'CAST(%%s AS %s)' % output_field.db_type(self.connection).split('(')[0]
-        return '%s'
-
     def check_expression_support(self, expression):
         from django.db.models.aggregates import Avg
         from django.db.models.expressions import Value
