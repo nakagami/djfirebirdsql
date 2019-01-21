@@ -22,7 +22,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     closed_cursor_error_class = InterfaceError
     has_case_insensitive_like = False
     implied_column_null = True
-    uppercases_column_names = True
     ignores_table_name_case = True
     truncates_names = True
     atomic_transactions = True

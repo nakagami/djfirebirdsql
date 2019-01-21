@@ -39,18 +39,21 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         # of all of that.
     }
 
-    def table_name_converter(self, name):
-        return name.lower()
+    def identifier_converter(self, name):
+        return name.strip().lower()
 
     def sequence_list(self):
         with self.connection.cursor() as cursor:
             cursor.execute(
-                """select lower(trim(rdb$relation_name)),
-                          lower(trim(rdb$field_name))
+                """select trim(rdb$relation_name),
+                          trim(rdb$field_name)
                     from rdb$relation_fields
                     where rdb$identity_type is not null
                     """)
-            return [{'table': r[0], 'column': r[1]} for r in cursor.fetchall()]
+            return [{
+                'table': self.identifier_converter(r[0]),
+                'column': self.identifier_converter(r[1])
+            } for r in cursor.fetchall()]
 
     def get_field_type(self, data_type, description):
         field_type = super().get_field_type(data_type, description)
@@ -65,22 +68,21 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         "Returns a list of table names in the current database."
         cursor.execute("""
             select
-                lower(trim(rdb$relation_name)),
+                trim(rdb$relation_name),
                 case when RDB$VIEW_BLR IS NULL then 't' else 'v' end as rel_type
             from rdb$relations
             where rdb$system_flag=0
             order by 1 """)
-        return [TableInfo(row[0], row[1]) for row in cursor.fetchall()]
+        return [TableInfo(self.identifier_converter(row[0]), row[1]) for row in cursor.fetchall()]
 
     def get_table_description(self, cursor, table_name):
         """
         Returns a description of the table, with the DB-API cursor.description interface.
         Must return a 'FieldInfo' struct 'name type_code display_size internal_size precision scale null_ok'
         """
-        tbl_name = "'%s'" % table_name.upper()
         cursor.execute("""
             select
-              lower(trim(rf.rdb$field_name))
+              trim(rf.rdb$field_name)
               , case
                   when (f.rdb$field_type in (7,8,16)) and (f.rdb$field_sub_type > 0) then
                     160 + f.rdb$field_sub_type
@@ -104,14 +106,14 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             from
               rdb$relation_fields rf join rdb$fields f on (rf.rdb$field_source = f.rdb$field_name)
             where
-              upper(rf.rdb$relation_name) = %s
+              upper(rf.rdb$relation_name) = upper(%s)
             order by
               rf.rdb$field_position
-            """ % (tbl_name,))
+            """ % (table_name,))
         items = []
         for r in cursor.fetchall():
             # name type_code display_size internal_size precision scale null_ok, default, identity_type
-            items.append(FieldInfo(r[0], r[1], r[2], r[2] or 0, r[3], r[4], not (r[5] == 1), r[6], r[7]))
+            items.append(FieldInfo(self.identifier_converter(r[0]), r[1], r[2], r[2] or 0, r[3], r[4], not (r[5] == 1), r[6], r[7]))
         return items
 
     def _name_to_index(self, cursor, table_name):
@@ -131,8 +133,8 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             references = []
             cursor.execute("""
                 select
-                    lower(refc.rdb$constraint_name),
-                    lower(i.rdb$relation_name)
+                    refc.rdb$constraint_name,
+                    i.rdb$relation_name
                 from rdb$index_segments s
                 left join rdb$indices i on i.rdb$index_name = s.rdb$index_name
                 left join rdb$relation_constraints rc on rc.rdb$index_name = s.rdb$index_name
@@ -142,7 +144,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
                 left join rdb$index_segments s2 on i2.rdb$index_name = s2.rdb$index_name
                 WHERE RC.RDB$CONSTRAINT_TYPE = 'FOREIGN KEY'
                 and upper(i2.rdb$relation_name) = %s """ % (tbl_name,))
-            return [(r[0].strip(), r[1].strip()) for r in cursor.fetchall()]
+            return [(self.identifier_converter(r[0]), self.identifier_converter(r[1].strip())) for r in cursor.fetchall()]
 
     def get_key_columns(self, cursor, table_name):
         """
@@ -153,9 +155,9 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         key_columns = []
         cursor.execute("""
             select
-                lower(s.rdb$field_name) as column_name,
-                lower(i2.rdb$relation_name) as referenced_table_name,
-                lower(s2.rdb$field_name) as referenced_column_name
+                s.rdb$field_name as column_name,
+                i2.rdb$relation_name as referenced_table_name,
+                s2.rdb$field_name as referenced_column_name
             from rdb$index_segments s
             left join rdb$indices i on i.rdb$index_name = s.rdb$index_name
             left join rdb$relation_constraints rc on rc.rdb$index_name = s.rdb$index_name
@@ -167,7 +169,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             and upper(i.rdb$relation_name) = %s """ % (tbl_name,))
 
         for r in cursor.fetchall():
-            key_columns.append((r[0].strip(), r[1].strip(), r[2].strip()))
+            key_columns.append((self.identifier_converter(r[0]), self.identifier_converter(r[1]), self.identifier_converter(r[2])))
         return key_columns
 
     def get_relations(self, cursor, table_name):
@@ -205,8 +207,8 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         cursor.execute("""
         SELECT
           case
-            when rc.RDB$CONSTRAINT_NAME is not null then lower(rc.RDB$CONSTRAINT_NAME)
-            else lower(i.RDB$INDEX_NAME)
+            when rc.RDB$CONSTRAINT_NAME is not null then rc.RDB$CONSTRAINT_NAME
+            else i.RDB$INDEX_NAME
           end as constraint_name,
 
           case
@@ -235,11 +237,11 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             index = False
             constraint = constraint_name.strip()
             constraint_type = constraint_type.strip()
-            column = column.strip().lower()
+            column = self.identifier_converter(column)
             if other_table:
-                other_table = other_table.strip().lower()
+                other_table = other_table.strip()
             if other_column:
-                other_column = other_column.strip().lower()
+                other_column = other_column.strip()
 
             if constraint_type == 'PRIMARY KEY':
                 primary_key = True
@@ -277,9 +279,9 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             field = "'%s'" % field_name.upper()
             cursor.execute("""
                 select
-                    lower(trim(s.rdb$index_name)),
-                    lower(trim(rc.rdb$constraint_name)),
-                    trim(rc.rdb$constraint_type)
+                    s.rdb$index_name,
+                    rc.rdb$constraint_name,
+                    rc.rdb$constraint_type
                 from rdb$index_segments s
                 left join rdb$indices i on i.rdb$index_name = s.rdb$index_name
                 left join rdb$relation_constraints rc on rc.rdb$index_name = s.rdb$index_name
@@ -287,4 +289,4 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
                 and s.rdb$field_name = %s
                 order by s.rdb$field_position """ % (table, field,))
     
-            return [(i[0], i[1], i[2]) for i in cursor.fetchall()]
+            return [(self.identifier_converter(i[0]), self.identifier_converter(i[1]), self.identifier_converter(i[2])) for i in cursor.fetchall()]
