@@ -40,7 +40,9 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
     }
 
     def identifier_converter(self, name):
-        return name.strip().lower()
+        if name:
+            name = name.strip().lower()
+        return name
 
     def sequence_list(self):
         with self.connection.cursor() as cursor:
@@ -235,13 +237,13 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             foreign_key = None
             check = False
             index = False
-            constraint = constraint_name.strip()
+            constraint = self.identifier_converter(constraint_name)
             constraint_type = constraint_type.strip()
             column = self.identifier_converter(column)
             if other_table:
-                other_table = other_table.strip()
+                other_table = self.identifier_converter(other_table)
             if other_column:
-                other_column = other_column.strip()
+                other_column = self.identifier_converter(other_column)
 
             if constraint_type == 'PRIMARY KEY':
                 primary_key = True
