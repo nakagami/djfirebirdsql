@@ -372,8 +372,6 @@ class DatabaseOperations(BaseDatabaseOperations):
         internal_type = expression.output_field.get_internal_type()
         if internal_type == 'DateTimeField':
             converters.append(self.convert_datetimefield_value)
-        elif internal_type in ['IPAddressField', 'GenericIPAddressField']:
-            converters.append(self.convert_ipfield_value)
         elif internal_type == 'UUIDField':
             converters.append(self.convert_uuidfield_value)
         return converters
@@ -382,11 +380,6 @@ class DatabaseOperations(BaseDatabaseOperations):
         if value is not None:
             if settings.USE_TZ:
                 value = timezone.make_aware(value, self.connection.timezone)
-        return value
-
-    def convert_ipfield_value(self, value, expression, connection):
-        if value is not None:
-            value = value.strip()
         return value
 
     def convert_uuidfield_value(self, value, expression, connection):
