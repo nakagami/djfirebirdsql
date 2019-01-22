@@ -108,10 +108,10 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             from
               rdb$relation_fields rf join rdb$fields f on (rf.rdb$field_source = f.rdb$field_name)
             where
-              upper(rf.rdb$relation_name) = upper(%s)
+              rf.rdb$relation_name = '%s'
             order by
               rf.rdb$field_position
-            """ % (table_name,))
+            """ % (table_name.strip().upper(),))
         items = []
         for r in cursor.fetchall():
             # name type_code display_size internal_size precision scale null_ok, default, identity_type
@@ -122,7 +122,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         """Return a dictionary of {field_name: field_index} for the given table.
            Indexes are 0-based.
         """
-        return dict([(d[0], i) for i, d in enumerate(self.get_table_description(cursor, table_name))])
+        return dict([(self.identifier_converter(d[0]), i) for i, d in enumerate(self.get_table_description(cursor, table_name))])
 
     def _get_references(self, table_name):
         """
@@ -131,7 +131,6 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         table_name: refernced tbale name
         """
         with self.connection.cursor() as cursor:
-            tbl_name = "'%s'" % table_name.upper()
             references = []
             cursor.execute("""
                 select
@@ -145,7 +144,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
                 left join rdb$indices i2 on i2.rdb$index_name = rc2.rdb$index_name
                 left join rdb$index_segments s2 on i2.rdb$index_name = s2.rdb$index_name
                 WHERE RC.RDB$CONSTRAINT_TYPE = 'FOREIGN KEY'
-                and upper(i2.rdb$relation_name) = %s """ % (tbl_name,))
+                and i2.rdb$relation_name = '%s' """ % (table_name.strip().upper(),))
             return [(self.identifier_converter(r[0]), self.identifier_converter(r[1].strip())) for r in cursor.fetchall()]
 
     def get_key_columns(self, cursor, table_name):
@@ -153,7 +152,6 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         Backends can override this to return a list of (column_name, referenced_table_name,
         referenced_column_name) for all key columns in given table.
         """
-        tbl_name = "'%s'" % table_name.upper()
         key_columns = []
         cursor.execute("""
             select
@@ -168,7 +166,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             left join rdb$indices i2 on i2.rdb$index_name = rc2.rdb$index_name
             left join rdb$index_segments s2 on i2.rdb$index_name = s2.rdb$index_name
             WHERE RC.RDB$CONSTRAINT_TYPE = 'FOREIGN KEY'
-            and upper(i.rdb$relation_name) = %s """ % (tbl_name,))
+            and i.rdb$relation_name = '%s' """ % (table_name.strip().upper(),))
 
         for r in cursor.fetchall():
             key_columns.append((self.identifier_converter(r[0]), self.identifier_converter(r[1]), self.identifier_converter(r[2])))
@@ -203,7 +201,6 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         if they don't name constraints of a certain type (e.g. SQLite)
         """
         # TODO: FIX check constraint
-        tbl_name = "'%s'" % table_name.upper()
         constraints = {}
 
         cursor.execute("""
@@ -229,9 +226,9 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         LEFT JOIN RDB$RELATION_CONSTRAINTS rc2 ON rc2.RDB$CONSTRAINT_NAME = refc.RDB$CONST_NAME_UQ
         LEFT JOIN RDB$INDICES i2 ON i2.RDB$INDEX_NAME = rc2.RDB$INDEX_NAME
         LEFT JOIN RDB$INDEX_SEGMENTS s2 ON i2.RDB$INDEX_NAME = s2.RDB$INDEX_NAME
-        WHERE i.RDB$RELATION_NAME = %s
+        WHERE i.RDB$RELATION_NAME = '%s'
         ORDER BY s.RDB$FIELD_POSITION
-        """ % (tbl_name,))
+        """ % (table_name.strip().upper(),))
         for constraint_name, constraint_type, column, other_table, other_column, unique in cursor.fetchall():
             primary_key = False
             foreign_key = None
@@ -287,8 +284,9 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
                 from rdb$index_segments s
                 left join rdb$indices i on i.rdb$index_name = s.rdb$index_name
                 left join rdb$relation_constraints rc on rc.rdb$index_name = s.rdb$index_name
-                where i.rdb$relation_name = %s
-                and s.rdb$field_name = %s
-                order by s.rdb$field_position """ % (table, field,))
+                where i.rdb$relation_name = '%s'
+                and s.rdb$field_name = '%s'
+                order by s.rdb$field_position """ % (table.strip().upper(), field.strip().upper())
+            )
     
             return [(self.identifier_converter(i[0]), self.identifier_converter(i[1]), self.identifier_converter(i[2])) for i in cursor.fetchall()]
