@@ -10,7 +10,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_paramstyle_pyformat = True
     has_native_uuid_field = False
     has_native_duration_field = False
-    supports_column_check_constraints = False
     supports_regex_backreferencing = False
     has_bulk_insert = False
     can_return_id_from_insert = True
@@ -39,3 +38,5 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     can_introspect_duration_field = False
     supports_partial_indexes = False
     supports_over_clause = True
+    supports_column_check_constraints = False
+    supports_table_check_constraints = False
