@@ -5,10 +5,8 @@ from django.db.utils import InterfaceError
 class DatabaseFeatures(BaseDatabaseFeatures):
     supports_forward_references = False
     supports_tablespaces = False
-    has_zoneinfo_database = False
     uses_savepoints = True
     supports_paramstyle_pyformat = True
-    has_native_uuid_field = False
     has_native_duration_field = False
     supports_regex_backreferencing = False
     has_bulk_insert = False
