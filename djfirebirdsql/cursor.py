@@ -68,6 +68,15 @@ class FirebirdCursorWrapper(Database.Cursor):
         for params in param_list:
             super().execute(convert_sql(query, params))
 
+    @property
+    def description(self):
+        if not self.stmt:
+            return None
+        return [(
+            x.aliasname.lower(), x.sqltype, x.display_length(), x.io_length(),
+            x.precision(), x.sqlscale, True if x.null_ok else False
+        ) for x in self.stmt.xsqlda]
+
     def fetchone(self):
         if len(self._rows):
             return self._rows.popleft()
