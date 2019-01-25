@@ -15,7 +15,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     for_update_after_from = False
     supports_transactions = True
     can_introspect_small_integer_field = True
-    supports_timezones = False
+    supports_timezones = True
     closed_cursor_error_class = InterfaceError
     has_case_insensitive_like = False
     implied_column_null = True

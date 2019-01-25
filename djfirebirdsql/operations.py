@@ -316,8 +316,6 @@ class DatabaseOperations(BaseDatabaseOperations):
         if timezone.is_aware(value):
             if settings.USE_TZ:
                 value = timezone.make_naive(value, self.connection.timezone)
-            else:
-                raise ValueError("Firebird backend does not support timezone-aware datetimes when USE_TZ is False.")
 
         # Replaces 6 digits microseconds to 4 digits allowed in Firebird
         if isinstance(value, datetime.datetime):
@@ -340,9 +338,6 @@ class DatabaseOperations(BaseDatabaseOperations):
         if hasattr(value, 'resolve_expression'):
             return value
 
-        # Firebird doesn't support tz-aware times
-        if timezone.is_aware(value):
-            raise ValueError("Firebird backend does not support timezone-aware times.")
         # Replaces 6 digits microseconds to 4 digits allowed in Firebird
         if isinstance(value, datetime.time):
             value = str(value)
