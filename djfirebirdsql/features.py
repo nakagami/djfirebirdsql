@@ -10,7 +10,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     has_native_duration_field = False
     supports_regex_backreferencing = False
     has_bulk_insert = False
-    can_return_id_from_insert = True
+    can_return_columns_from_insert = True
     has_select_for_update = False
     for_update_after_from = False
     supports_transactions = True

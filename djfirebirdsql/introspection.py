@@ -1,7 +1,5 @@
-import datetime
 from collections import namedtuple
 
-from django.utils.encoding import force_text
 from django.db.backends.base.introspection import (
     BaseDatabaseIntrospection, FieldInfo, TableInfo,
 )

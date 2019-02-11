@@ -8,7 +8,7 @@ from django.conf import settings
 from django.db.backends.utils import truncate_name
 from django.db.backends.base.operations import BaseDatabaseOperations
 from django.utils import timezone
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 from django.db.utils import DatabaseError
 from django.db.models.functions import (
     ConcatPair, Substr, StrIndex, Repeat, Degrees, Radians
@@ -328,7 +328,7 @@ class DatabaseOperations(BaseDatabaseOperations):
                 second=value.second,
                 microsecond=(value.microsecond //100) * 100
             )
-        return force_text(value)[:24]
+        return force_str(value)[:24]
 
     def adapt_timefield_value(self, value):
         if value is None:
@@ -343,7 +343,7 @@ class DatabaseOperations(BaseDatabaseOperations):
             value = str(value)
         if isinstance(value, str):
             value = value[:13]
-        return force_text(value)
+        return force_str(value)
 
     def combine_expression(self, connector, sub_expressions):
         lhs, rhs = sub_expressions
