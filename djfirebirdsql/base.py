@@ -128,6 +128,15 @@ class DatabaseWrapper(BaseDatabaseWrapper):
             conn_params['host'] = settings_dict['HOST']
         if settings_dict['PORT']:
             conn_params['port'] = settings_dict['PORT']
+
+        options = settings_dict['OPTIONS']
+        isolation_level = options.get('isolation_level', 'read committed').lower()
+        conn_params['isolation_level'] = {
+            'read committed': Database.ISOLATION_LEVEL_READ_COMMITED,
+            'repeatable read': Database.ISOLATION_LEVEL_REPEATABLE_READ,
+            'serializable read': Database.ISOLATION_LEVEL_SERIALIZABLE,
+        }[isolation_level]
+
         return conn_params
 
     def get_new_connection(self, conn_params):
