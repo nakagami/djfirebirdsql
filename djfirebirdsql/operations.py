@@ -84,7 +84,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         from django.db.models.aggregates import Avg
         from django.db.models.expressions import Value
         from django.db.models.functions import (
-            Greatest, Least, Length, Chr, LTrim, RTrim, Ord
+            Greatest, Least, Length, Chr, LTrim, RTrim, Ord, MD5
         )
 
         if isinstance(expression, Avg):
@@ -105,6 +105,8 @@ class DatabaseOperations(BaseDatabaseOperations):
             expression.function = 'ASCII_VAL'
         elif isinstance(expression, Degrees):
             expression.template='(Cast(%%(expressions)s AS DOUBLE PRECISION) * 180 / %s)' % math.pi
+        elif isinstance(expression, MD5):
+            expression.template='HASH(%(expressions)s USING MD5)'
         elif isinstance(expression, Value):
             if isinstance(expression.value, datetime.datetime):
                 expression.value = str(expression.value)[:24]

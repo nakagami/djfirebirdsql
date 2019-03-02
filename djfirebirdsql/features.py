@@ -36,5 +36,3 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     can_introspect_duration_field = False
     supports_partial_indexes = False
     supports_over_clause = True
-    supports_column_check_constraints = False
-    supports_table_check_constraints = False
