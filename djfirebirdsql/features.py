@@ -36,3 +36,4 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     can_introspect_duration_field = False
     supports_partial_indexes = False
     supports_over_clause = True
+    can_return_id_from_insert = True
