@@ -11,7 +11,8 @@ from django.utils import timezone
 from django.utils.encoding import force_str
 from django.db.utils import DatabaseError
 from django.db.models.functions import (
-    ConcatPair, Substr, StrIndex, Repeat, Degrees, Radians
+    ConcatPair, Substr, StrIndex, Repeat, Degrees, Radians,
+    MD5, SHA1, SHA224, SHA256, SHA384, SHA512,
 )
 
 
@@ -105,6 +106,8 @@ class DatabaseOperations(BaseDatabaseOperations):
             expression.function = 'ASCII_VAL'
         elif isinstance(expression, Degrees):
             expression.template='(Cast(%%(expressions)s AS DOUBLE PRECISION) * 180 / %s)' % math.pi
+        elif isinstance(expression, (MD5, SHA1, SHA224, SHA256, SHA384, SHA512)):
+            expression.template='Hash(%%(expression)s using %s)'
         elif isinstance(expression, Value):
             if isinstance(expression.value, datetime.datetime):
                 expression.value = str(expression.value)[:24]
