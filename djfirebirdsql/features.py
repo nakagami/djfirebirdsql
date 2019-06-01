@@ -9,7 +9,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     can_return_columns_from_insert = True
     supports_transactions = True
     can_introspect_small_integer_field = True
-    supports_timezones = False
     closed_cursor_error_class = InterfaceError
     has_case_insensitive_like = False
     implied_column_null = True
@@ -25,4 +24,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_over_clause = True
     has_bulk_insert = False
     requires_literal_defaults = True
-
+    can_introspect_duration_field = False
+    supports_timezones = True
+    has_zoneinfo_database = False
