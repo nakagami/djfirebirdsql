@@ -57,7 +57,8 @@ class FirebirdCursorWrapper(Database.Cursor):
     def execute(self, query, params=None):
         if self.closed:
             raise InterfaceError('Cursor is closed')
-        super().execute(convert_sql(query, params))
+        self.query = convert_sql(query, params)
+        super().execute(query)
         self._rows = collections.deque(super().fetchall())
         if self._transaction._autocommit:
             self._transaction._connection.commit()

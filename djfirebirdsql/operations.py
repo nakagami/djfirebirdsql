@@ -291,6 +291,11 @@ class DatabaseOperations(BaseDatabaseOperations):
     def pk_default_value(self):
         return "DEFAULT"
 
+    def last_executed_query(self, cursor, sql, params):
+        if cursor.query:
+            return cursor.query
+        return None
+
     def return_insert_id(self):
         return "RETURNING %s", ()
 
