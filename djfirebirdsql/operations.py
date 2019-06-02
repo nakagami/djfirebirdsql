@@ -10,8 +10,9 @@ from django.db.backends.base.operations import BaseDatabaseOperations
 from django.utils import timezone
 from django.utils.encoding import force_str
 from django.db.utils import DatabaseError
+from django.db.models.expressions import Func
 from django.db.models.functions import (
-    ConcatPair, Substr, StrIndex, Repeat, Degrees, Radians,
+    Cast, ConcatPair, Substr, StrIndex, Repeat, Degrees, Radians,
     MD5, SHA1, SHA224, SHA256, SHA384, SHA512,
 )
 
@@ -52,6 +53,15 @@ def _str_index_as_sql(self, compiler, connection, function=None, template=None, 
     return template % data, params
 
 
+def _cast_as_sql(self, compiler, connection, **extra_context):
+    extra_context['db_type'] = self.output_field.cast_db_type(connection)
+    output_field = extra_context['output_field']
+    internal_type = output_field.get_internal_type()
+    if internal_type in ("CharField", ):
+        extra_context['template'] = '%(function)s(Trim(%(expressions)s) AS %(db_type)s)'
+    return Func.as_sql(self, compiler, connection, **extra_context)
+
+Cast.as_firebirdsql = _cast_as_sql
 ConcatPair.as_firebirdsql = ConcatPair.as_sqlite
 Substr.as_firebirdsql = _substr_as_sql
 StrIndex.as_firebirdsql = _str_index_as_sql

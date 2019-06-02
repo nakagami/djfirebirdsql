@@ -53,6 +53,7 @@ class FirebirdCursorWrapper(Database.Cursor):
         super().__init__(*args, **kwargs)
         self._rows = collections.deque()
         self.closed = False
+        self.query = ''
 
     def execute(self, query, params=None):
         if self.closed:
