@@ -28,3 +28,4 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_timezones = False
     has_zoneinfo_database = False
     supports_select_intersection = False
+    supports_select_difference = False
