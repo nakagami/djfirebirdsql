@@ -27,3 +27,4 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     can_introspect_duration_field = False
     supports_timezones = False
     has_zoneinfo_database = False
+    supports_select_intersection = False
