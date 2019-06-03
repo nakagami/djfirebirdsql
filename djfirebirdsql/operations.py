@@ -10,9 +10,8 @@ from django.db.backends.base.operations import BaseDatabaseOperations
 from django.utils import timezone
 from django.utils.encoding import force_str
 from django.db.utils import DatabaseError
-from django.db.models.expressions import Func
 from django.db.models.functions import (
-    Cast, ConcatPair, Substr, StrIndex, Repeat, Degrees, Radians,
+    ConcatPair, Substr, StrIndex, Repeat, Degrees, Radians,
     MD5, SHA1, SHA224, SHA256, SHA384, SHA512,
 )
 
