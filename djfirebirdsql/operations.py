@@ -297,7 +297,7 @@ class DatabaseOperations(BaseDatabaseOperations):
             return cursor.query
         return None
 
-    def return_insert_id(self):
+    def return_insert_id(self, field):
         return "RETURNING %s", ()
 
     def random_function_sql(self):
