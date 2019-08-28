@@ -29,3 +29,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     has_zoneinfo_database = False
     supports_select_intersection = False
     supports_select_difference = False
+
+    support_column_check_constraints = False
+    support_table_check_constraints = False
+    can_introspect_check_constraints = False
