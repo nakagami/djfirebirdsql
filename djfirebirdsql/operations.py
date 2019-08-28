@@ -61,17 +61,10 @@ Radians.as_firebirdsql = Radians.as_oracle
 class DatabaseOperations(BaseDatabaseOperations):
     cast_char_field_without_max_length = 'varchar(8191)'
 
-    integer_field_ranges = {
-        'SmallIntegerField': (-32768, 32767),
-        'IntegerField': (-2147483648, 2147483647),
-        'BigIntegerField': (-9223372036854775808, 9223372036854775807),
-        'PositiveSmallIntegerField': (0, 32767),
-        'PositiveIntegerField': (0, 2147483647),
-    }
-
     cast_data_types = {
         'AutoField': 'integer',
         'BigAutoField': 'bigint',
+        'SmallAutoField': 'smallint',
     }
 
     def cache_key_culling_sql(self):
