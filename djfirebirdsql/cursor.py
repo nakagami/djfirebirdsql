@@ -13,7 +13,7 @@ def _quote_value(value):
     import binascii
     if isinstance(value, (datetime.date, datetime.time, datetime.datetime)):
         return "'%s'" % value
-    if isinstance(value, uuid.UUID):
+    elif isinstance(value, uuid.UUID):
         return "'%s'" % value.hex
     elif isinstance(value, str):
         return "'%s'" % value.replace("\'", "\'\'")
@@ -53,11 +53,13 @@ class FirebirdCursorWrapper(Database.Cursor):
         super().__init__(*args, **kwargs)
         self._rows = collections.deque()
         self.closed = False
+        self.query = ''
 
     def execute(self, query, params=None):
         if self.closed:
             raise InterfaceError('Cursor is closed')
-        super().execute(convert_sql(query, params))
+        self.query = convert_sql(query, params)
+        super().execute(self.query)
         self._rows = collections.deque(super().fetchall())
         if self._transaction._autocommit:
             self._transaction._connection.commit()
@@ -67,6 +69,15 @@ class FirebirdCursorWrapper(Database.Cursor):
             raise InterfaceError('Cursor is closed')
         for params in param_list:
             super().execute(convert_sql(query, params))
+
+    @property
+    def description(self):
+        if not self.stmt:
+            return None
+        return [(
+            x.aliasname.lower(), x.sqltype, x.display_length(), x.io_length(),
+            x.precision(), x.sqlscale, True if x.null_ok else False
+        ) for x in self.stmt.xsqlda]
 
     def fetchone(self):
         if len(self._rows):

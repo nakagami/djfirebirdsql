@@ -1,15 +1,19 @@
 import uuid
 import datetime
 import pytz
+import math
 import firebirdsql as Database
 
 from django.conf import settings
 from django.db.backends.utils import truncate_name
 from django.db.backends.base.operations import BaseDatabaseOperations
 from django.utils import timezone
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 from django.db.utils import DatabaseError
-from django.db.models.functions import ConcatPair, Substr, StrIndex, Repeat, Degrees
+from django.db.models.functions import (
+    ConcatPair, Substr, StrIndex, Repeat, Degrees, Radians,
+    MD5, SHA1, SHA224, SHA256, SHA384, SHA512,
+)
 
 
 def _substr_as_sql(self, compiler, connection, function=None, template=None, arg_joiner=None, **extra_context):
@@ -52,17 +56,15 @@ ConcatPair.as_firebirdsql = ConcatPair.as_sqlite
 Substr.as_firebirdsql = _substr_as_sql
 StrIndex.as_firebirdsql = _str_index_as_sql
 Repeat.as_firebirdsql = Repeat.as_oracle
-Degrees.as_firebird = Degrees.as_oracle
+Radians.as_firebirdsql = Radians.as_oracle
 
 class DatabaseOperations(BaseDatabaseOperations):
     cast_char_field_without_max_length = 'varchar(8191)'
 
-    integer_field_ranges = {
-        'SmallIntegerField': (-32768, 32767),
-        'IntegerField': (-2147483648, 2147483647),
-        'BigIntegerField': (-9223372036854775808, 9223372036854775807),
-        'PositiveSmallIntegerField': (0, 32767),
-        'PositiveIntegerField': (0, 2147483647),
+    cast_data_types = {
+        'AutoField': 'integer',
+        'BigAutoField': 'bigint',
+        'SmallAutoField': 'smallint',
     }
 
     def cache_key_culling_sql(self):
@@ -71,12 +73,6 @@ class DatabaseOperations(BaseDatabaseOperations):
               FROM (SELECT cache_key, rank() OVER (ORDER BY cache_key) AS rank FROM %s)
              WHERE rank = %%s + 1
         """
-
-    def unification_cast_sql(self, output_field):
-        internal_type = output_field.get_internal_type()
-        if internal_type in ("GenericIPAddressField", "IPAddressField", "TimeField", "UUIDField"):
-            return 'CAST(%%s AS %s)' % output_field.db_type(self.connection).split('(')[0]
-        return '%s'
 
     def check_expression_support(self, expression):
         from django.db.models.aggregates import Avg
@@ -101,16 +97,22 @@ class DatabaseOperations(BaseDatabaseOperations):
             expression.template = 'TRIM(TRAILING FROM %(expressions)s)'
         elif isinstance(expression, Ord):
             expression.function = 'ASCII_VAL'
+        elif isinstance(expression, Degrees):
+            expression.template='(Cast(%%(expressions)s AS DOUBLE PRECISION) * 180 / %s)' % math.pi
+        elif isinstance(expression, (MD5, SHA1, SHA224, SHA256, SHA384, SHA512)):
+            expression.template='Hash(%(expressions)s using %(function)s)'
         elif isinstance(expression, Value):
             if isinstance(expression.value, datetime.datetime):
                 expression.value = str(expression.value)[:24]
 
     def date_extract_sql(self, lookup_type, field_name):
-        if lookup_type == 'week_day':
-            return "EXTRACT(WEEKDAY FROM %s) + 1" % field_name
+        if lookup_type == 'iso_year':
+            return "EXTRACT(YEAR FROM %s)" % field_name
+        elif lookup_type == 'week_day':
+            return "(EXTRACT(WEEKDAY FROM %s) + 1)" % field_name
         elif lookup_type == 'quarter':
             return "((EXTRACT(MONTH FROM %s) - 1) / 3 + 1)" % field_name
-        return "EXTRACT(%s FROM %s)" % (lookup_type.upper(), field_name)
+        return "EXTRACT(%s FROM %s)" % (lookup_type, field_name)
 
     def date_interval_sql(self, timedelta):
         return timedelta
@@ -121,6 +123,8 @@ class DatabaseOperations(BaseDatabaseOperations):
 
     def date_trunc_sql(self, lookup_type, field_name):
         if lookup_type == 'year':
+            sql = "EXTRACT(year FROM %s)||'-01-01 00:00:00'" % field_name
+        elif lookup_type == 'iso_year':
             sql = "EXTRACT(year FROM %s)||'-01-01 00:00:00'" % field_name
         elif lookup_type == 'quarter':
             sql = "EXTRACT(year FROM %s)||'-'||((EXTRACT(MONTH FROM %s) -1) / 3 * 3 + 1)||'-01 00:00:00'" % (field_name, field_name)
@@ -150,12 +154,14 @@ class DatabaseOperations(BaseDatabaseOperations):
 
     def datetime_extract_sql(self, lookup_type, field_name, tzname):
         field_name = self._convert_field_to_tz(field_name, tzname)
-        if lookup_type == 'week_day':
+        if lookup_type == 'iso_year':
+            sql = "EXTRACT(year FROM %s)" % field_name
+        elif lookup_type == 'week_day':
             sql = "EXTRACT(weekday FROM %s) + 1" % field_name
         elif lookup_type == 'quarter':
             sql = "((EXTRACT(month FROM %s) - 1) / 3 + 1)" % field_name
         else:
-            sql = "EXTRACT(%s FROM %s)" % (lookup_type.upper(), field_name)
+            sql = "EXTRACT(%s FROM %s)" % (lookup_type, field_name)
         return sql
 
     def datetime_trunc_sql(self, lookup_type, field_name, tzname):
@@ -167,6 +173,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         """
         field_name = self._convert_field_to_tz(field_name, tzname)
         year = "EXTRACT(year FROM %s)" % field_name
+        iso_year = "EXTRACT(year FROM %s)" % field_name
         month = "EXTRACT(month FROM %s)" % field_name
         day = "EXTRACT(day FROM %s)" % field_name
         hh = "EXTRACT(hour FROM %s)" % field_name
@@ -177,6 +184,8 @@ class DatabaseOperations(BaseDatabaseOperations):
         quarter = "((EXTRACT(month FROM %s) -1) / 3 * 3 + 1)" % field_name
         if lookup_type == 'year':
             sql = "%s||'-01-01 00:00:00'" % year
+        elif lookup_type == 'iso_year':
+            sql = "%s||'-01-01 00:00:00'" % iso_year
         elif lookup_type == 'quarter':
             sql = "%s||'-'||%s||'-01 00:00:00'" % (year, quarter)
         elif lookup_type == 'month':
@@ -194,6 +203,12 @@ class DatabaseOperations(BaseDatabaseOperations):
         return "CAST(%s AS TIMESTAMP)" % sql
 
     def time_trunc_sql(self, lookup_type, field_name):
+        fields = {
+            'hour': '%%H:00:00',
+            'minute': '%%H:%%i:00',
+            'second': '%%H:%%i:%%s',
+        }  # Use double percents to escape.
+
         if lookup_type in fields:
             if lookup_type == 'hour':
                 s = "EXTRACT(hour FROM %s)||':00:00'" % (field_name,)
@@ -218,6 +233,7 @@ class DatabaseOperations(BaseDatabaseOperations):
     def quote_name(self, name):
         if not name.startswith('"') and not name.endswith('"'):
             name = '"%s"' % truncate_name(name, self.max_name_length())
+        name = name.replace('%', '%%')
         return name.upper()
 
     def sql_flush(self, style, tables, sequences, allow_cascade=False):
@@ -269,7 +285,12 @@ class DatabaseOperations(BaseDatabaseOperations):
     def pk_default_value(self):
         return "DEFAULT"
 
-    def return_insert_id(self):
+    def last_executed_query(self, cursor, sql, params):
+        if cursor.query:
+            return cursor.query
+        return None
+
+    def return_insert_id(self, field):
         return "RETURNING %s", ()
 
     def random_function_sql(self):
@@ -297,8 +318,6 @@ class DatabaseOperations(BaseDatabaseOperations):
         if timezone.is_aware(value):
             if settings.USE_TZ:
                 value = timezone.make_naive(value, self.connection.timezone)
-            else:
-                raise ValueError("Firebird backend does not support timezone-aware datetimes when USE_TZ is False.")
 
         # Replaces 6 digits microseconds to 4 digits allowed in Firebird
         if isinstance(value, datetime.datetime):
@@ -311,7 +330,7 @@ class DatabaseOperations(BaseDatabaseOperations):
                 second=value.second,
                 microsecond=(value.microsecond //100) * 100
             )
-        return force_text(value)[:24]
+        return force_str(value)[:24]
 
     def adapt_timefield_value(self, value):
         if value is None:
@@ -321,15 +340,12 @@ class DatabaseOperations(BaseDatabaseOperations):
         if hasattr(value, 'resolve_expression'):
             return value
 
-        # Firebird doesn't support tz-aware times
-        if timezone.is_aware(value):
-            raise ValueError("Firebird backend does not support timezone-aware times.")
         # Replaces 6 digits microseconds to 4 digits allowed in Firebird
         if isinstance(value, datetime.time):
             value = str(value)
         if isinstance(value, str):
             value = value[:13]
-        return force_text(value)
+        return force_str(value)
 
     def combine_expression(self, connector, sub_expressions):
         lhs, rhs = sub_expressions
@@ -353,8 +369,6 @@ class DatabaseOperations(BaseDatabaseOperations):
         internal_type = expression.output_field.get_internal_type()
         if internal_type == 'DateTimeField':
             converters.append(self.convert_datetimefield_value)
-        elif internal_type in ['IPAddressField', 'GenericIPAddressField']:
-            converters.append(self.convert_ipfield_value)
         elif internal_type == 'UUIDField':
             converters.append(self.convert_uuidfield_value)
         return converters
@@ -363,11 +377,6 @@ class DatabaseOperations(BaseDatabaseOperations):
         if value is not None:
             if settings.USE_TZ:
                 value = timezone.make_aware(value, self.connection.timezone)
-        return value
-
-    def convert_ipfield_value(self, value, expression, connection):
-        if value is not None:
-            value = value.strip()
         return value
 
     def convert_uuidfield_value(self, value, expression, connection):

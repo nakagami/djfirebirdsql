@@ -5,7 +5,7 @@ Django database backend for firebird
 from distutils.core import setup, Command
 
 classifiers = [
-    'Development Status :: 3 - Alpha',
+    'Development Status :: 2 - Pre-Alpha',
     'License :: OSI Approved :: BSD License',
     'Operating System :: OS Independent',
     'Programming Language :: Python',
@@ -15,7 +15,7 @@ classifiers = [
 ]
 
 setup(name='djfirebirdsql', 
-        version='0.1.0',
+        version='0.0.4',
         description='Django database backend for firebird',
         long_description=open('README.rst').read(),
         url='https://github.com/nakagami/djfirebirdsql/',
