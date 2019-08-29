@@ -26,7 +26,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     ignores_table_name_case = True
     truncates_names = True
     atomic_transactions = True
-    supports_select_intersection = False
     supports_select_difference = False
     supports_index_column_ordering = False
     bare_select_suffix = " FROM RDB$DATABASE"
