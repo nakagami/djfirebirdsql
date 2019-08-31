@@ -33,3 +33,5 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     support_column_check_constraints = False
     support_table_check_constraints = False
     can_introspect_check_constraints = False
+
+    supports_ignore_conflicts = False
