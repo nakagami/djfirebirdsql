@@ -138,10 +138,29 @@ class DatabaseOperations(BaseDatabaseOperations):
             sql = field_name
         return "CAST(%s AS TIMESTAMP)" % sql
 
+    def _tz_offset(self, tzname):
+        if '+' in tzname:
+            tz = tzname[:tzname.find('+')]
+            offset = tzname[tzname.find('+'):]
+            offset = int(offset[1:3]) * 3600 + int(offset[4:6]) * 60
+        elif '-' in tzname:
+            tz = tzname[:tzname.find('-')]
+            offset = tzname[tzname.find('-'):]
+            offset = (int(offset[1:3]) * 3600 + int(offset[4:6]) * 60) * -1
+        else:
+            tz = tzname
+            offset = 0
+
+        return datetime.datetime.now(pytz.timezone(tz)).utcoffset().total_seconds() + offset
+
     def _convert_field_to_tz(self, field_name, tzname):
-        if settings.USE_TZ:
-            offset = int(datetime.datetime.now(pytz.timezone(tzname)).utcoffset().total_seconds())
-            field_name = 'DATEADD(SECOND, %d, %s)' % (offset, field_name)
+        if not settings.USE_TZ:
+            return field_name
+
+        if self.connection.timezone_name != tzname:
+            from_tz = self._tz_offset(self.connection.timezone_name)
+            to_tz = self._tz_offset(tzname)
+            field_name = 'DATEADD(SECOND, %d, %s)' % (to_tz - from_tz, field_name)
         return field_name
 
     def datetime_cast_date_sql(self, field_name, tzname):
