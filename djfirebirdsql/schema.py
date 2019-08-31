@@ -19,6 +19,13 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
     sql_delete_identity = "ALTER TABLE %(table)s ALTER COLUMN %(column)s DROP IDENTITY"
     sql_create_index = 'CREATE INDEX %(name)s ON %(table)s (%(columns)s)%(extra)s'
 
+    def execute(self, sql, params=()):
+        if self.connection.connection:
+            self.connection.connection.commit()
+        super().execute(sql, params)
+        if self.connection.connection:
+            self.connection.connection.commit()
+
     def quote_value(self, value):
         return _quote_value(value)
 
