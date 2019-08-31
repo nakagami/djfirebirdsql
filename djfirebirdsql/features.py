@@ -35,3 +35,4 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     can_introspect_check_constraints = False
 
     supports_ignore_conflicts = False
+    can_create_inline_fk = False
