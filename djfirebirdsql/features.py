@@ -14,7 +14,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     implied_column_null = True
     ignores_table_name_case = True
     truncates_names = True
-    supports_index_column_ordering = False
     bare_select_suffix = " FROM RDB$DATABASE"
     supports_sequence_reset = False
     supports_subqueries_in_group_by = False
