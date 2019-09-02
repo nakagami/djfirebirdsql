@@ -100,7 +100,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         elif isinstance(expression, Degrees):
             expression.template='(Cast(%%(expressions)s AS DOUBLE PRECISION) * 180 / %s)' % math.pi
         elif isinstance(expression, (MD5, SHA1, SHA224, SHA256, SHA384, SHA512)):
-            expression.template='Hash(%(expressions)s using %(function)s)'
+            expression.template='LOWER(HEX_ENCODE(Hash(%(expressions)s using %(function)s)))'
         elif isinstance(expression, Value):
             if isinstance(expression.value, datetime.datetime):
                 expression.value = str(expression.value)[:24]
