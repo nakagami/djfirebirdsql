@@ -29,6 +29,9 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_select_intersection = False
     supports_select_difference = False
 
-    support_column_check_constraints = False
-    support_table_check_constraints = False
+    supports_column_check_constraints = False
+    supports_table_check_constraints = False
     can_introspect_check_constraints = False
+
+    supports_ignore_conflicts = False
+    can_create_inline_fk = False
