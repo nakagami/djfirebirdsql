@@ -273,9 +273,6 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
           Return a list of index (index_name, type, constraint_name)
         """
         with self.connection.cursor() as cursor:
-
-            table = "'%s'" % table_name.upper()
-            field = "'%s'" % field_name.upper()
             cursor.execute("""
                 select
                     s.rdb$index_name,
@@ -286,7 +283,9 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
                 left join rdb$relation_constraints rc on rc.rdb$index_name = s.rdb$index_name
                 where i.rdb$relation_name = '%s'
                 and s.rdb$field_name = '%s'
-                order by s.rdb$field_position """ % (table.strip().upper(), field.strip().upper())
+                order by s.rdb$field_position """ % (
+                    table_name.strip().upper(), field_name.strip().upper()
+                )
             )
     
             return [(self.identifier_converter(i[0]), self.identifier_converter(i[1]), self.identifier_converter(i[2])) for i in cursor.fetchall()]
