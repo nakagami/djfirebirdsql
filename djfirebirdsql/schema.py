@@ -20,13 +20,6 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
     sql_delete_identity = "ALTER TABLE %(table)s ALTER COLUMN %(column)s DROP IDENTITY"
     sql_create_index = 'CREATE INDEX %(name)s ON %(table)s (%(columns)s)%(extra)s'
 
-    def execute(self, sql, params=()):
-        if self.connection.connection:
-            self.connection.connection.commit()
-        super().execute(sql, params)
-        if self.connection.connection:
-            self.connection.connection.commit()
-
     def quote_value(self, value):
         return _quote_value(value)
 
@@ -53,23 +46,6 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
                 'table': self.quote_name(model._meta.db_table),
                 'column': self.quote_name(old_field.column),
             })
-
-        if old_field.primary_key and new_field.unique:
-            for index_name, constraint_name, constraint_type in self._get_field_indexes(model, old_field):
-                if constraint_type == 'PRIMARY KEY':
-                    self.execute(self.sql_pk_to_unique % {
-                        'name': self.quote_name(constraint_name),
-                        'table': self.quote_name(model._meta.db_table),
-                        'column': self.quote_name(old_field.column),
-                    })
-        elif old_field.unique and new_field.primary_key:
-            for index_name, constraint_name, constraint_type in self._get_field_indexes(model, old_field):
-                if constraint_type == 'UNIQUE':
-                    self.execute(self.sql_unique_to_pk % {
-                        'name': self.quote_name(constraint_name),
-                        'table': self.quote_name(model._meta.db_table),
-                        'column': self.quote_name(old_field.column),
-                    })
 
         super()._alter_field(model, old_field, new_field, old_type, new_type,
                      old_db_params, new_db_params)
