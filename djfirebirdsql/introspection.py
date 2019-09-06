@@ -131,11 +131,13 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         table_name: refernced tbale name
         """
         with self.connection.cursor() as cursor:
-            references = []
             cursor.execute("""
                 select
                     refc.rdb$constraint_name,
-                    i.rdb$relation_name
+                    i.rdb$relation_name,
+                    s.rdb$field_name as column_name,
+                    i2.rdb$relation_name as referenced_table_name,
+                    s2.rdb$field_name as referenced_column_name
                 from rdb$index_segments s
                 left join rdb$indices i on i.rdb$index_name = s.rdb$index_name
                 left join rdb$relation_constraints rc on rc.rdb$index_name = s.rdb$index_name
@@ -145,7 +147,14 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
                 left join rdb$index_segments s2 on i2.rdb$index_name = s2.rdb$index_name
                 WHERE RC.RDB$CONSTRAINT_TYPE = 'FOREIGN KEY'
                 and i2.rdb$relation_name = '%s' """ % (table_name.strip().upper(),))
-            return [(self.identifier_converter(r[0]), self.identifier_converter(r[1].strip())) for r in cursor.fetchall()]
+
+            return [(
+                r[0].strip().lower(),
+                r[1].strip().lower(),
+                r[2].strip().lower(),
+                r[3].strip().lower(),
+                r[4].strip().lower(),
+            ) for r in cursor.fetchall()]
 
     def get_key_columns(self, cursor, table_name):
         """
