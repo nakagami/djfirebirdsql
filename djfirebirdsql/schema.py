@@ -47,6 +47,11 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
                 'column': self.quote_name(old_field.column),
             })
 
+        if old_type != new_type:
+            for r in self.connection.introspection._get_references(model._meta.db_table):
+                if r[2] == old_field.column:
+                    self.execute(self.sql_delete_fk % {'name': r[0], 'table': r[1].upper()})
+
         super()._alter_field(model, old_field, new_field, old_type, new_type,
                      old_db_params, new_db_params)
 
