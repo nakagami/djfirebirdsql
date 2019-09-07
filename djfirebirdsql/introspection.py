@@ -205,11 +205,13 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
          * foreign_key: (table, column) of target, or None
          * check: True if check constraint, False otherwise
          * index: True if index, False otherwise.
+         * orders: The order (ASC/DESC) defined for the columns of indexes
+         * type: The type of the index (btree, hash, etc.)
 
         Some backends may return special constraint names that don't exist
         if they don't name constraints of a certain type (e.g. SQLite)
         """
-        # TODO: FIX check constraint
+        tbl_name = "'%s'" % table_name.upper()
         constraints = {}
 
         cursor.execute("""
@@ -227,7 +229,8 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
           s.RDB$FIELD_NAME AS field_name,
           i2.RDB$RELATION_NAME AS references_table,
           s2.RDB$FIELD_NAME AS references_field,
-          i.RDB$UNIQUE_FLAG
+          i.RDB$UNIQUE_FLAG,
+          i.RDB$INDEX_TYPE
         FROM RDB$INDEX_SEGMENTS s
         LEFT JOIN RDB$INDICES i ON i.RDB$INDEX_NAME = s.RDB$INDEX_NAME
         LEFT JOIN RDB$RELATION_CONSTRAINTS rc ON rc.RDB$INDEX_NAME = s.RDB$INDEX_NAME
@@ -235,21 +238,22 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         LEFT JOIN RDB$RELATION_CONSTRAINTS rc2 ON rc2.RDB$CONSTRAINT_NAME = refc.RDB$CONST_NAME_UQ
         LEFT JOIN RDB$INDICES i2 ON i2.RDB$INDEX_NAME = rc2.RDB$INDEX_NAME
         LEFT JOIN RDB$INDEX_SEGMENTS s2 ON i2.RDB$INDEX_NAME = s2.RDB$INDEX_NAME
-        WHERE i.RDB$RELATION_NAME = '%s'
+        WHERE i.RDB$RELATION_NAME = %s
         ORDER BY s.RDB$FIELD_POSITION
-        """ % (table_name.strip().upper(),))
-        for constraint_name, constraint_type, column, other_table, other_column, unique in cursor.fetchall():
+        """ % (tbl_name,))
+        for constraint_name, constraint_type, column, other_table, other_column, unique, order in cursor.fetchall():
             primary_key = False
             foreign_key = None
             check = False
             index = False
-            constraint = self.identifier_converter(constraint_name)
+            order = 'DESC' if order else 'ASC'
+            constraint = constraint_name.strip()
             constraint_type = constraint_type.strip()
-            column = self.identifier_converter(column)
+            column = column.strip().lower()
             if other_table:
-                other_table = self.identifier_converter(other_table)
+                other_table = other_table.strip().lower()
             if other_column:
-                other_column = self.identifier_converter(other_column)
+                other_column = other_column.strip().lower()
 
             if constraint_type == 'PRIMARY KEY':
                 primary_key = True
@@ -257,25 +261,27 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
                 unique = True
             elif constraint_type == 'FOREIGN KEY':
                 foreign_key = (other_table, other_column,)
+                index = True
             elif constraint_type == 'INDEX':
                 index = True
 
             if constraint not in constraints:
                 constraints[constraint] = {
                     "columns": [],
+                    "orders": [],
                     "primary_key": primary_key,
                     "unique": unique,
                     "foreign_key": foreign_key,
                     "check": check,
                     "index": index,
-                    "type": 'idx' if index else '',
+                    "type": Index.suffix
                 }
             # Record the details
             constraints[constraint]['columns'].append(column)
+            constraints[constraint]['orders'].append(order)
 
-        if not constraints:
-            raise ValueError("'%s' is not found." % table_name)
         return constraints
+
 
     def _get_field_indexes(self, table_name, field_name):
         """
