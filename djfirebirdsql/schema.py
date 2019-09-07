@@ -38,29 +38,29 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
             new_type = 'smallint'
         return super()._alter_column_type_sql(model, old_field, new_field, new_type)
 
-    def _alter_field(self, model, old_field, new_field, old_type, new_type,
-                     old_db_params, new_db_params, strict=False):
-        if (old_field.get_internal_type() in ('AutoField', 'BigAutoField', 'SmallAutoField')
-            and new_field.get_internal_type() not in ('AutoField', 'BigAutoField', 'SmallAutoField')):
-            self.execute(self.sql_delete_identity % {
-                'table': self.quote_name(model._meta.db_table),
-                'column': self.quote_name(old_field.column),
-            })
-
-        if old_type != new_type:
-            for r in self.connection.introspection._get_references(model._meta.db_table):
-                if r[3] == model._meta.db_table and r[4] == old_field.column:
-                    self.execute(self.sql_delete_fk % {'name': r[0], 'table': r[1].upper()})
-
-        super()._alter_field(model, old_field, new_field, old_type, new_type,
-                     old_db_params, new_db_params)
-
-        if (old_field.get_internal_type() not in ('AutoField', 'BigAutoField', 'SmallAutoField') and
-            new_field.get_internal_type() in ('AutoField', 'BigAutoField', 'SmallAutoField')):
-            self.execute(self.sql_add_identity % {
-                'table': self.quote_name(model._meta.db_table),
-                'column': self.quote_name(old_field.column),
-            })
+#    def _alter_field(self, model, old_field, new_field, old_type, new_type,
+#                     old_db_params, new_db_params, strict=False):
+#        if (old_field.get_internal_type() in ('AutoField', 'BigAutoField', 'SmallAutoField')
+#            and new_field.get_internal_type() not in ('AutoField', 'BigAutoField', 'SmallAutoField')):
+#            self.execute(self.sql_delete_identity % {
+#                'table': self.quote_name(model._meta.db_table),
+#                'column': self.quote_name(old_field.column),
+#            })
+#
+#        if old_type != new_type:
+#            for r in self.connection.introspection._get_references(model._meta.db_table):
+#                if r[3] == model._meta.db_table and r[4] == old_field.column:
+#                    self.execute(self.sql_delete_fk % {'name': r[0], 'table': r[1].upper()})
+#
+#        super()._alter_field(model, old_field, new_field, old_type, new_type,
+#                     old_db_params, new_db_params)
+#
+#        if (old_field.get_internal_type() not in ('AutoField', 'BigAutoField', 'SmallAutoField') and
+#            new_field.get_internal_type() in ('AutoField', 'BigAutoField', 'SmallAutoField')):
+#            self.execute(self.sql_add_identity % {
+#                'table': self.quote_name(model._meta.db_table),
+#                'column': self.quote_name(old_field.column),
+#            })
 
     def delete_model(self, model):
         """Delete a model from the database."""
