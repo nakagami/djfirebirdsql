@@ -1,4 +1,3 @@
-from django.db.models import Index
 from django.db.backends.base.schema import BaseDatabaseSchemaEditor
 from .cursor import FirebirdCursorWrapper, _quote_value     # NOQA isort:skip
 
