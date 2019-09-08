@@ -282,25 +282,21 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
 
         return constraints
 
+    def _get_field_indexes(self, cursor, table_name, field_name):
+        """
+          Return a list of index names that are not created automatically (ie: Foreign Key)
+        """
+        table = "'%s'" % table_name.upper()
+        field = "'%s'" % field_name.upper()
+        cursor.execute("""
+            select s.rdb$index_name
+            from rdb$index_segments s
+            left join rdb$indices i on i.rdb$index_name = s.rdb$index_name
+            left join rdb$relation_constraints rc on rc.rdb$index_name = s.rdb$index_name
+            where i.rdb$relation_name = %s
+            and s.rdb$field_name = %s
+            and rc.rdb$constraint_type is null
+            order by s.rdb$field_position """ % (table, field,))
 
-    def _get_field_indexes(self, table_name, field_name):
-        """
-          Return a list of index (index_name, type, constraint_name)
-        """
-        with self.connection.cursor() as cursor:
-            cursor.execute("""
-                select
-                    s.rdb$index_name,
-                    rc.rdb$constraint_name,
-                    rc.rdb$constraint_type
-                from rdb$index_segments s
-                left join rdb$indices i on i.rdb$index_name = s.rdb$index_name
-                left join rdb$relation_constraints rc on rc.rdb$index_name = s.rdb$index_name
-                where i.rdb$relation_name = '%s'
-                and s.rdb$field_name = '%s'
-                order by s.rdb$field_position """ % (
-                    table_name.strip().upper(), field_name.strip().upper()
-                )
-            )
-    
-            return [(self.identifier_converter(i[0]), self.identifier_converter(i[1]), self.identifier_converter(i[2])) for i in cursor.fetchall()]
+        return [index_name[0].strip() for index_name in cursor.fetchall()]
+
