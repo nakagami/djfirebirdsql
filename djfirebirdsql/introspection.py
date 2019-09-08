@@ -299,6 +299,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
                 left join rdb$relation_constraints rc on rc.rdb$index_name = s.rdb$index_name
                 where i.rdb$relation_name = '%s'
                 and s.rdb$field_name = '%s'
+                and rc.rdb$constraint_type is null
                 order by s.rdb$field_position """ % (
                     table_name.strip().upper(), field_name.strip().upper()
                 )
