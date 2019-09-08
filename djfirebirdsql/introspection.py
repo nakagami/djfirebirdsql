@@ -212,7 +212,6 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         Some backends may return special constraint names that don't exist
         if they don't name constraints of a certain type (e.g. SQLite)
         """
-        tbl_name = "'%s'" % table_name.upper()
         constraints = {}
 
         cursor.execute("""
@@ -239,9 +238,9 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         LEFT JOIN RDB$RELATION_CONSTRAINTS rc2 ON rc2.RDB$CONSTRAINT_NAME = refc.RDB$CONST_NAME_UQ
         LEFT JOIN RDB$INDICES i2 ON i2.RDB$INDEX_NAME = rc2.RDB$INDEX_NAME
         LEFT JOIN RDB$INDEX_SEGMENTS s2 ON i2.RDB$INDEX_NAME = s2.RDB$INDEX_NAME
-        WHERE i.RDB$RELATION_NAME = %s
+        WHERE i.RDB$RELATION_NAME = '%s'
         ORDER BY s.RDB$FIELD_POSITION
-        """ % (tbl_name,))
+        """ % (table_name.strip().upper(),))
         for constraint_name, constraint_type, column, other_table, other_column, unique, order in cursor.fetchall():
             primary_key = False
             foreign_key = None
@@ -299,7 +298,6 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
                 left join rdb$relation_constraints rc on rc.rdb$index_name = s.rdb$index_name
                 where i.rdb$relation_name = '%s'
                 and s.rdb$field_name = '%s'
-                and rc.rdb$constraint_type is null
                 order by s.rdb$field_position """ % (
                     table_name.strip().upper(), field_name.strip().upper()
                 )
