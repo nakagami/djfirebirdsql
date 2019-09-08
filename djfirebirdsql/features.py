@@ -35,3 +35,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
 
     supports_ignore_conflicts = False
     can_create_inline_fk = False
+
+    connection_persists_old_columns = True
+    supports_atomic_references_rename = False
