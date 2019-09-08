@@ -248,7 +248,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             check = False
             index = False
             order = 'DESC' if order else 'ASC'
-            constraint = constraint_name.strip()
+            constraint = constraint_name.strip().lower()
             constraint_type = constraint_type.strip()
             column = column.strip().lower()
             if other_table:
