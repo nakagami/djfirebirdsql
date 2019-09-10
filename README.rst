@@ -17,7 +17,7 @@ Installation
 
 ::
 
-    $  pip install firebirdsql djfirebirdsql django==3.0a1
+    $ pip install firebirdsql djfirebirdsql django==3.0a1
 
 Database settings example
 ------------------------------
