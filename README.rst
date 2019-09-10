@@ -8,7 +8,7 @@ I referrerd django-firebird database backend https://github.com/maxirobaina/djan
 Requirements
 -------------
 
-* Django 2.1+
+* Django 3.0 alpha1
 * Firebird 4.0+
 * pyfirebirdsql (https://github.com/nakagami/pyfirebirdsql) recently released.
 
@@ -17,7 +17,7 @@ Installation
 
 ::
 
-    $ pip install firebirdsql djfirebirdsql django
+    $  pip install firebirdsql djfirebirdsql django==3.0a1
 
 Database settings example
 ------------------------------
