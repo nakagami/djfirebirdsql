@@ -20,6 +20,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_partially_nullable_unique_constraints = False
     supports_mixed_date_datetime_comparisons = False
     can_introspect_autofield = True
+    supports_index_on_text_field = False
     supports_over_clause = True
     has_bulk_insert = False
     can_introspect_duration_field = False
