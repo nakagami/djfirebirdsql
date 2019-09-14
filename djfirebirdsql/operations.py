@@ -67,6 +67,14 @@ class DatabaseOperations(BaseDatabaseOperations):
         'SmallAutoField': 'smallint',
     }
 
+    def bulk_batch_size(self, fields, objs):
+        if len(fields) == 1:
+            return 500
+        elif len(fields) > 1:
+            return self.connection.features.max_query_params // len(fields)
+        else:
+            return len(objs)
+
     def cache_key_culling_sql(self):
         return """
             SELECT cache_key
