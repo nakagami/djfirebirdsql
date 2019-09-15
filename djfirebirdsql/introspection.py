@@ -277,9 +277,9 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
                     "type": Index.suffix
                 }
 
-                # Record the details
-                constraints[constraint]['columns'].append(column)
-                constraints[constraint]['orders'].append(order)
+            # Record the details
+            constraints[constraint]['columns'].append(column)
+            constraints[constraint]['orders'].append(order)
 
 #        # Check constraints
 #        cursor.execute("""
