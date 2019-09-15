@@ -214,6 +214,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         """
         constraints = {}
 
+        # Indexed constraints
         cursor.execute("""
         SELECT
           case
@@ -259,7 +260,6 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
                 primary_key = True
             elif constraint_type == 'UNIQUE':
                 unique = True
-                index = True
             elif constraint_type == 'FOREIGN KEY':
                 foreign_key = (other_table, other_column,)
             elif constraint_type == 'INDEX':
@@ -276,9 +276,39 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
                     "index": index,
                     "type": Index.suffix
                 }
-            # Record the details
-            constraints[constraint]['columns'].append(column)
-            constraints[constraint]['orders'].append(order)
+
+                # Record the details
+                constraints[constraint]['columns'].append(column)
+                constraints[constraint]['orders'].append(order)
+
+#        # Check constraints
+#        cursor.execute("""
+#        SELECT
+#          c.RDB$CONSTRAINT_NAME,
+#          tg.RDB$TRIGGER_SOURCE
+#        FROM RDB$RELATION_CONSTRAINTS c,
+#            RDB$CHECK_CONSTRAINTS chkc,
+#            RDB$TRIGGERS tg
+#        where
+#            c.RDB$CONSTRAINT_TYPE='CHECK'
+#            AND c.RDB$CONSTRAINT_NAME = chkc.RDB$CONSTRAINT_NAME
+#            AND chkc.RDB$TRIGGER_NAME = tg.RDB$TRIGGER_NAME
+#            AND tg.RDB$TRIGGER_TYPE = 1
+#            AND c.RDB$RELATION_NAME = '%s'
+#        """ % (table_name.strip().upper(),))
+#
+#        for constraint_name, source in cursor.fetchall():
+#            constraint = constraint_name.strip().lower()
+#            constraints[constraint] = {
+#                    "columns": [],
+#                    "orders": [],
+#                    "primary_key": False,
+#                    "unique": False,
+#                    "foreign_key": False,
+#                    "check": True,
+#                    "index": False,
+#                    "type": Index.suffix
+#            }
 
         return constraints
 
