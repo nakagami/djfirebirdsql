@@ -34,3 +34,4 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_atomic_references_rename = False
     supports_column_check_constraints = False
     max_query_params = 999
+    connection_persists_old_columns = True
