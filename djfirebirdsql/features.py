@@ -35,3 +35,4 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     connection_persists_old_columns = True
 
     supports_index_column_ordering = False
+    supports_index_on_text_field = False
