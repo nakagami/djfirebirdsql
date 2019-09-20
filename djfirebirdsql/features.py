@@ -27,11 +27,11 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     has_zoneinfo_database = False
     supports_select_intersection = False
     supports_select_difference = False
-
     supports_ignore_conflicts = False
     can_create_inline_fk = False
-
     supports_atomic_references_rename = False
     supports_column_check_constraints = False
     max_query_params = 999
     connection_persists_old_columns = True
+
+    supports_index_column_ordering = False

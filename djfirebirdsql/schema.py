@@ -66,3 +66,14 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         for r in self.connection.introspection._get_references(model._meta.db_table):
             self.execute(self.sql_delete_fk % {'name': r[0], 'table': r[1].upper()})
         super().delete_model(model)
+
+    def _create_index_sql(
+        self, model, fields, *, name=None, suffix='', using='',
+        db_tablespace=None, col_suffixes=(), sql=None, opclasses=(),
+        condition=None, concurrently=False,
+    ):
+        return super()._create_index_sql(
+            model, fields, name=name, suffix=suffix, using=using, db_tablespace=None,
+            col_suffixes=col_suffixes, sql=sql, opclasses=opclasses, condition=None,
+        )
+
