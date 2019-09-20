@@ -20,6 +20,8 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
     sql_delete_identity = "ALTER TABLE %(table)s ALTER COLUMN %(column)s DROP IDENTITY"
 
     def execute(self, query, params=()):
+        if self.connection.connection:
+            self.connection.connection.commit()
         super().execute(query, params)
         if self.connection.connection:
             self.connection.connection.commit()
