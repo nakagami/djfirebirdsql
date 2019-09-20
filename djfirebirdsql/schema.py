@@ -79,3 +79,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
             col_suffixes=col_suffixes, sql=sql, opclasses=opclasses, condition=None,
         )
 
+    def _index_columns(self, table, columns, col_suffixes, opclasses):
+        if col_suffixes:
+            col_suffixes = [""] * len(col_suffixes)
+        return super()._index_columns(table, columns, col_suffixes, opclasses)
