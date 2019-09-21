@@ -27,6 +27,8 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
             self.connection.connection.commit()
 
     def quote_value(self, value):
+        if isinstance(value, str):
+            value = value.replace('%', '%%')
         return _quote_value(value)
 
     def prepare_default(self, value):

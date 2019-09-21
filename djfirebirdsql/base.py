@@ -6,6 +6,7 @@ Requires firebirdsql: http://github.com/nakagami/pyfirebirdsql
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.db.backends.base.base import BaseDatabaseWrapper
+from django.utils.asyncio import async_unsafe
 from django.db.backends import utils
 
 try:
@@ -140,6 +141,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
 
         return conn_params
 
+    @async_unsafe
     def get_new_connection(self, conn_params):
         connection = Database.connect(**conn_params)
         return connection
@@ -151,6 +153,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         with self.wrap_database_errors:
             self.connection.set_autocommit(autocommit)
 
+    @async_unsafe
     def create_cursor(self, name=None):
         return self.connection.cursor(factory=FirebirdCursorWrapper)
 
