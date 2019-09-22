@@ -1,6 +1,8 @@
 import datetime
 import uuid
 import collections
+import binascii
+import enum
 from django.utils import timezone
 from django.db.utils import InterfaceError
 
@@ -10,7 +12,9 @@ except ImportError as e:
     raise ImproperlyConfigured("Error loading firebirdsql module: %s" % e)
 
 def _quote_value(value):
-    import binascii
+    if isinstance(value, enum.Enum):
+        value = value.value
+
     if isinstance(value, (datetime.date, datetime.time, datetime.datetime)):
         return "'%s'" % value
     elif isinstance(value, uuid.UUID):
