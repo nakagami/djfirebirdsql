@@ -69,6 +69,11 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         # delete related foreign key constraints
         for r in self.connection.introspection._get_references(model._meta.db_table):
             self.execute(self.sql_delete_fk % {'name': r[0], 'table': r[1].upper()})
+        with self.connection.cursor() as cursor:
+            for k, v in self.connection.introspection.get_constraints(cursor, model._meta.db_table).items():
+                if v['foreign_key']:
+                    self.execute(self.sql_delete_fk % {'name': k, 'table': model._meta.db_table.upper()})
+
         super().delete_model(model)
 
     def _create_index_sql(
