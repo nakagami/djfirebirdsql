@@ -122,7 +122,7 @@ class DatabaseOperations(BaseDatabaseOperations):
             sql = "((EXTRACT(MONTH FROM %s) - 1) / 3 + 1)" % field_name
         else:
             sql = "EXTRACT(%s FROM %s)" % (lookup_type, field_name)
-        return "IIF(%s IS NULL, NULL, %s)" % (field_name, sql)
+        return sql
     def date_interval_sql(self, timedelta):
         return timedelta
 
@@ -145,7 +145,7 @@ class DatabaseOperations(BaseDatabaseOperations):
             sql = "EXTRACT(year FROM %s)||'-'||EXTRACT(month FROM %s)||'-'||EXTRACT(day FROM %s)||' 00:00:00'" % (field_name, field_name, field_name)
         else:
             sql = field_name
-        return "IIF(%s IS NULL, NULL, CAST(%s AS TIMESTAMP))" % (field_name, sql)
+        return "CAST(%s AS TIMESTAMP)" % sql
 
     def _tz_offset(self, tzname):
         if '+' in tzname:
@@ -190,7 +190,7 @@ class DatabaseOperations(BaseDatabaseOperations):
             sql = "((EXTRACT(month FROM %s) - 1) / 3 + 1)" % field_name
         else:
             sql = "EXTRACT(%s FROM %s)" % (lookup_type, field_name)
-        return "IIF(%s IS NULL, NULL, %s)" % (field_name, sql)
+        return sql
 
     def datetime_trunc_sql(self, lookup_type, field_name, tzname):
         """
@@ -228,7 +228,7 @@ class DatabaseOperations(BaseDatabaseOperations):
             sql = "%s||'-'||%s||'-'||%s||' '||%s||':'||%s||':'||%s" % (year, month, day, hh, mm, ss)
         elif lookup_type == 'week':
             sql = "DATEADD(day, IIF(%s = 0, -6, -%s+1), CAST(%s||'-'||%s||'-'||%s||' 00:00:00' AS TIMESTAMP))" % (weekday, weekday, year, month, day)
-        return "IIF(%s IS NULL, NULL, CAST(%s AS TIMESTAMP))" % (field_name, sql)
+        return "CAST(%s AS TIMESTAMP)" % sql
 
     def time_trunc_sql(self, lookup_type, field_name):
         fields = {
