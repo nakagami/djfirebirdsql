@@ -21,6 +21,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
 
     def execute(self, query, params=()):
         self.connection.ensure_connection()
+        self.connection.connection.commit()
         super().execute(query, params)
 
     def quote_value(self, value):
