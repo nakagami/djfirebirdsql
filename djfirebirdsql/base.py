@@ -21,6 +21,7 @@ from .features import DatabaseFeatures                      # NOQA isort:skip
 from .introspection import DatabaseIntrospection            # NOQA isort:skip
 from .operations import DatabaseOperations                  # NOQA isort:skip
 from .schema import DatabaseSchemaEditor                    # NOQA isort:skip
+from .validation import DatabaseValidation                  # NOQA isort:skip
 from .cursor import FirebirdCursorWrapper, _quote_value     # NOQA isort:skip
 
 
@@ -62,10 +63,14 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         'TimeField': 'time',
         'UUIDField': 'char(32)',
     }
+
+    _limited_data_types = ('blob sub_type 1',)
+
     data_type_check_constraints = {
         'PositiveIntegerField': '%(qn_column)s >= 0',
         'PositiveSmallIntegerField': '%(qn_column)s >= 0',
     }
+
     operators = {
         'exact': '= %s',
         'iexact': '= UPPER(%s)',
