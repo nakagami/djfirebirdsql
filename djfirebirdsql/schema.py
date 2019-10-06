@@ -37,19 +37,6 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
             indexes = self.connection.introspection._get_field_indexes(cursor, model._meta.db_table, field.column)
         return indexes
 
-    def _alter_field(self, model, old_field, new_field, old_type, new_type,
-                     old_db_params, new_db_params, strict=False):
-        if old_type != new_type:
-            for r in self.connection.introspection._get_references(model._meta.db_table):
-                if r[4] == old_field:
-                    self.execute(self.sql_delete_fk % {'name': r[0], 'table': r[1].upper()})
-            for index_name in self._get_field_indexes(model, old_field):
-                sql = self._delete_constraint_sql(self.sql_delete_index, model, index_name)
-                self.execute(sql)
-
-        super()._alter_field(model, old_field, new_field, old_type, new_type,
-                     old_db_params, new_db_params, strict)
-
     def remove_field(self, model, field):
         for index_name in self._get_field_indexes(model, field):
             sql = self._delete_constraint_sql(self.sql_delete_index, model, index_name)
