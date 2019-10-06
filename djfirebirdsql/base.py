@@ -114,6 +114,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     features_class = DatabaseFeatures
     introspection_class = DatabaseIntrospection
     ops_class = DatabaseOperations
+    validation_class = DatabaseValidation
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
