@@ -15,7 +15,7 @@ classifiers = [
 ]
 
 setup(name='djfirebirdsql', 
-        version='0.1.5',
+        version='0.2.0',
         description='Django database backend for firebird',
         long_description=open('README.rst').read(),
         url='https://github.com/nakagami/djfirebirdsql/',
