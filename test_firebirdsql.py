@@ -20,7 +20,6 @@ DATABASES = {
         'HOST': 'localhost',
         'USER': 'sysdba',
         'PASSWORD': 'masterkey',
-        'OPTIONS': {'isolation_level': firebirdsql.ISOLATION_LEVEL_SERIALIZABLE},
     },
     'other': {
         'ENGINE': 'djfirebirdsql',
@@ -28,7 +27,6 @@ DATABASES = {
         'HOST': 'localhost',
         'USER': 'sysdba',
         'PASSWORD': 'masterkey',
-        'OPTIONS': {'isolation_level': firebirdsql.ISOLATION_LEVEL_SERIALIZABLE},
     }
 }
 
