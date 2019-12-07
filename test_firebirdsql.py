@@ -11,6 +11,7 @@
 # situations, so it is recommended to run the test suite against as many
 # database backends as possible.  You may want to create a separate settings
 # file for each of the backends you test against.
+import firebirdsql
 
 DATABASES = {
     'default': {
@@ -19,6 +20,7 @@ DATABASES = {
         'HOST': 'localhost',
         'USER': 'sysdba',
         'PASSWORD': 'masterkey',
+        'OPTIONS': {'isolation_level': firebirdsql.ISOLATION_LEVEL_SERIALIZABLE},
     },
     'other': {
         'ENGINE': 'djfirebirdsql',
@@ -26,6 +28,7 @@ DATABASES = {
         'HOST': 'localhost',
         'USER': 'sysdba',
         'PASSWORD': 'masterkey',
+        'OPTIONS': {'isolation_level': firebirdsql.ISOLATION_LEVEL_SERIALIZABLE},
     }
 }
 
