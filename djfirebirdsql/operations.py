@@ -68,12 +68,9 @@ class DatabaseOperations(BaseDatabaseOperations):
     }
 
     def bulk_batch_size(self, fields, objs):
-        if len(fields) == 1:
-            return 500
-        elif len(fields) > 1:
+        if fields:
             return self.connection.features.max_query_params // len(fields)
-        else:
-            return len(objs)
+        return len(objs)
 
     def cache_key_culling_sql(self):
         return """
