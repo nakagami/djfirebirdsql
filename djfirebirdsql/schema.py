@@ -3,6 +3,7 @@ from .cursor import FirebirdCursorWrapper, _quote_value     # NOQA isort:skip
 
 
 class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
+    sql_create_table = "RECREATE TABLE %(table)s (%(definition)s)"
     sql_rename_table = "Rename table is not allowed"  # Not supported
     sql_delete_table = "DROP TABLE %(table)s"
     sql_create_column = "ALTER TABLE %(table)s ADD %(column)s %(definition)s"
