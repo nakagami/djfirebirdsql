@@ -34,5 +34,5 @@ class DatabaseClient(BaseDatabaseClient):
         args.extend(parameters)
 
     def runshell(self, parameters):
-        aegs = DatabaseClient.settings_to_cmd_args(self.connection.settings_dict, parameters)
-        subprocess.run(args, chrck=True)
+        args = DatabaseClient.settings_to_cmd_args(self.connection.settings_dict, parameters)
+        subprocess.run(args, check=True)
