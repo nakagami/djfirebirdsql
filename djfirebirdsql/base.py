@@ -156,7 +156,3 @@ class DatabaseWrapper(BaseDatabaseWrapper):
 
     def is_usable(self):
         return not self.connection.is_disconnect()
-
-    def close_if_unusable_or_obsolete(self):
-        if self.errors_occurred:
-            self.close()
