@@ -55,6 +55,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         'GenericIPAddressField': 'char(39)',
         'NullBooleanField': 'boolean',
         'OneToOneField': 'integer',
+        'PositiveBigIntegerField': 'bigint',
         'PositiveIntegerField': 'integer',
         'PositiveSmallIntegerField': 'smallint',
         'SlugField': 'varchar(%(max_length)s)',
@@ -67,6 +68,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     _limited_data_types = ('blob sub_type 1',)
 
     data_type_check_constraints = {
+        'PositiveBigIntegerField': '%(qn_column)s >= 0',
         'PositiveIntegerField': '%(qn_column)s >= 0',
         'PositiveSmallIntegerField': '%(qn_column)s >= 0',
     }
