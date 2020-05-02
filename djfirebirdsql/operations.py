@@ -306,9 +306,6 @@ class DatabaseOperations(BaseDatabaseOperations):
     def max_name_length(self):
         return 63
 
-    def pk_default_value(self):
-        return "DEFAULT"
-
     def last_executed_query(self, cursor, sql, params):
         if cursor.query:
             return cursor.query

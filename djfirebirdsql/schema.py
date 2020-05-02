@@ -70,7 +70,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
                           condition=None):
         return super()._create_index_sql(
             model, fields, name=name, suffix=suffix, using=using, db_tablespace=None,
-            col_suffixes=col_suffixes, sql=sql, opclasses=opclasses, condition=None,
+            col_suffixes=(), sql=sql, opclasses=opclasses, condition=None,
         )
 
     def _index_columns(self, table, columns, col_suffixes, opclasses):
