@@ -393,6 +393,8 @@ class DatabaseOperations(BaseDatabaseOperations):
             return 'FLOOR(%(lhs)s / POWER(2, %(rhs)s))' % {'lhs': lhs, 'rhs': rhs}
         elif connector == '^':
             return 'POWER(%s)' % ','.join(sub_expressions)
+        elif connector == '#':
+            return 'BIN_XOR(%s)' % ','.join(sub_expressions)
         return super().combine_expression(connector, sub_expressions)
 
 
