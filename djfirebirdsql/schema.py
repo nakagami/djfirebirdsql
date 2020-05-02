@@ -65,11 +65,9 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
 
         super().delete_model(model)
 
-    def _create_index_sql(
-        self, model, fields, *, name=None, suffix='', using='',
-        db_tablespace=None, col_suffixes=(), sql=None, opclasses=(),
-        condition=None, concurrently=False,
-    ):
+    def _create_index_sql(self, model, fields, *, name=None, suffix='', using='',
+                          db_tablespace=None, col_suffixes=(), sql=None, opclasses=(),
+                          condition=None):
         return super()._create_index_sql(
             model, fields, name=name, suffix=suffix, using=using, db_tablespace=None,
             col_suffixes=col_suffixes, sql=sql, opclasses=opclasses, condition=None,
