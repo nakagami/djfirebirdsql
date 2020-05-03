@@ -113,6 +113,8 @@ class DatabaseOperations(BaseDatabaseOperations):
     def date_extract_sql(self, lookup_type, field_name):
         if lookup_type == 'iso_year':
             sql = "EXTRACT(YEAR FROM %s)" % field_name
+        elif lookup_type == 'iso_week_day':
+            sql = "EXTRACT(WEEKDAY FROM %s)" % field_name
         elif lookup_type == 'week_day':
             sql = "(EXTRACT(WEEKDAY FROM %s) + 1)" % field_name
         elif lookup_type == 'quarter':
@@ -181,6 +183,8 @@ class DatabaseOperations(BaseDatabaseOperations):
         field_name = self._convert_field_to_tz(field_name, tzname)
         if lookup_type == 'iso_year':
             sql = "EXTRACT(year FROM %s)" % field_name
+        elif lookup_type == 'iso_week_day':
+            sql = "EXTRACT(weekday FROM %s)" % field_name
         elif lookup_type == 'week_day':
             sql = "EXTRACT(weekday FROM %s) + 1" % field_name
         elif lookup_type == 'quarter':
