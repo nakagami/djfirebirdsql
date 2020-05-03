@@ -24,6 +24,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     has_bulk_insert = False
     can_introspect_duration_field = False
     supports_timezones = False
+    has_zoneinfo_database = True
     has_zoneinfo_database = False
     supports_select_intersection = False
     supports_select_difference = False
