@@ -1,5 +1,5 @@
 from django.db.backends.base.schema import BaseDatabaseSchemaEditor
-from .cursor import FirebirdCursorWrapper, _quote_value     # NOQA isort:skip
+from .cursor import _quote_value     # NOQA isort:skip
 
 
 class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
