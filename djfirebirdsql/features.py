@@ -34,7 +34,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_table_check_constraints = False
     can_introspect_check_constraints = False
     max_query_params = 999
-    connection_persists_old_columns = True
     supports_index_column_ordering = False
     supports_index_on_text_field = False
     supports_forward_references = False
+    connection_persists_old_columns = True
