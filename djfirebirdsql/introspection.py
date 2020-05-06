@@ -256,7 +256,6 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             if other_column:
                 other_column = other_column.strip().lower()
 
-            # TODO: introspect check constraint
             if constraint_type == 'PRIMARY KEY':
                 primary_key = True
             elif constraint_type == 'UNIQUE':
@@ -284,23 +283,13 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
 
         # Check constraints
         cursor.execute("""
-        SELECT
-          c.RDB$CONSTRAINT_NAME,
-          tg.RDB$TRIGGER_SOURCE
-        FROM RDB$RELATION_CONSTRAINTS c,
-            RDB$CHECK_CONSTRAINTS chkc,
-            RDB$TRIGGERS tg
-        where
-            c.RDB$CONSTRAINT_TYPE='CHECK'
-            AND c.RDB$CONSTRAINT_NAME = chkc.RDB$CONSTRAINT_NAME
-            AND chkc.RDB$TRIGGER_NAME = tg.RDB$TRIGGER_NAME
-            AND tg.RDB$TRIGGER_TYPE = 1
-            AND c.RDB$RELATION_NAME = '%s'
+        SELECT c.RDB$CONSTRAINT_NAME
+        FROM RDB$RELATION_CONSTRAINTS c
+        WHERE c.RDB$CONSTRAINT_TYPE='CHECK' AND c.RDB$RELATION_NAME = '%s'
         """ % (table_name.strip().upper(),))
 
-        for constraint_name, source in cursor.fetchall():
-            constraint = constraint_name.strip().lower()
-            constraints[constraint] = {
+        for r in cursor.fetchall():
+            constraints[r[0].strip().lower()] = {
                     "columns": [],
                     "orders": [],
                     "primary_key": False,
@@ -308,7 +297,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
                     "foreign_key": False,
                     "check": True,
                     "index": False,
-                    "type": Index.suffix
+                    "type": "",
             }
 
         return constraints
@@ -330,4 +319,3 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             order by s.rdb$field_position """ % (table, field,))
 
         return [index_name[0].strip() for index_name in cursor.fetchall()]
-

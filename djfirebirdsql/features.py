@@ -31,10 +31,8 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     can_create_inline_fk = False
     supports_atomic_references_rename = False
     supports_column_check_constraints = False
-    # TODO: introspect check constraint
-    # supports_table_check_constraints = True
-    supports_table_check_constraints = False
-    can_introspect_check_constraints = False
+    supports_table_check_constraints = True
+    can_introspect_check_constraints = True
     max_query_params = 999
     supports_index_column_ordering = False
     supports_index_on_text_field = False
