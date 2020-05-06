@@ -256,6 +256,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             if other_column:
                 other_column = other_column.strip().lower()
 
+            # TODO: introspect check constraint
             if constraint_type == 'PRIMARY KEY':
                 primary_key = True
             elif constraint_type == 'UNIQUE':

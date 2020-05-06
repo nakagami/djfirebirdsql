@@ -31,6 +31,8 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     can_create_inline_fk = False
     supports_atomic_references_rename = False
     supports_column_check_constraints = False
+    # TODO: introspect check constraint
+    # supports_table_check_constraints = True
     supports_table_check_constraints = False
     can_introspect_check_constraints = False
     max_query_params = 999
