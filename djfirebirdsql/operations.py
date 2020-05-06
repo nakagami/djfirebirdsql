@@ -101,7 +101,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         elif isinstance(expression, RTrim):
             expression.template = 'TRIM(TRAILING FROM %(expressions)s)'
         elif isinstance(expression, Ord):
-            expression.function = 'ASCII_VAL'
+            expression.template = 'ASCII_VAL(LEFT(%(expressions)s, 1))'
         elif isinstance(expression, Degrees):
             expression.template='(Cast(%%(expressions)s AS DOUBLE PRECISION) * 180 / %s)' % math.pi
         elif isinstance(expression, (MD5, SHA1, SHA224, SHA256, SHA384, SHA512)):
