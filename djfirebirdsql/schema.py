@@ -30,11 +30,6 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
     def prepare_default(self, value):
         return self.quote_value(value)
 
-    def _alter_field(self, model, old_field, new_field, old_type, new_type,
-            old_db_params, new_db_params, strict=False):
-        super()._alter_field(model, old_field, new_field, old_type, new_type,
-                          old_db_params, new_db_params, False)
-
     def _get_field_indexes(self, model, field):
         with self.connection.cursor() as cursor:
             indexes = self.connection.introspection._get_field_indexes(cursor, model._meta.db_table, field.column)
