@@ -1,5 +1,6 @@
 from django.db.backends.base.schema import BaseDatabaseSchemaEditor
 from django.db.backends.ddl_references import Columns
+from django.db import DatabaseError
 from .cursor import _quote_value     # NOQA isort:skip
 
 
@@ -61,6 +62,13 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
                     self.execute(self.sql_delete_fk % {'name': k, 'table': model._meta.db_table.upper()})
 
         super().delete_model(model)
+
+    def alter_field(self, model, old_field, new_field, strict=False):
+        try:
+            super().alter_field(model, old_field, new_field, False)
+        except DatabaseError as e:
+            # TODO: something need alter field type workaround
+            raise e
 
     def _index_columns(self, table, columns, col_suffixes, opclasses):
         return Columns(table, columns, self.quote_name)
