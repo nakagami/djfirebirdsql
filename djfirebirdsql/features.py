@@ -38,3 +38,4 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_index_on_text_field = False
     supports_forward_references = False
     connection_persists_old_columns = True
+    supports_json_field = False
