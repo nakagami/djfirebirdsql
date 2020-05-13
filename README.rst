@@ -9,7 +9,7 @@ Requirements
 -------------
 
 * Django 3.0
-* Firebird 4.0 beta1
+* Firebird 4.0 beta1 (Firebird 3.0 minimum version required)
 * pyfirebirdsql (https://github.com/nakagami/pyfirebirdsql) recently released.
 
 Installation
