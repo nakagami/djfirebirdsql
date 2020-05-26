@@ -33,7 +33,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_column_check_constraints = False
     supports_table_check_constraints = True
     can_introspect_check_constraints = True
-    max_query_params = 999
     supports_index_column_ordering = False
     supports_index_on_text_field = False
     supports_forward_references = False
