@@ -45,4 +45,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             **super().introspected_field_types,
             'DurationField': 'BigIntegerField',
             'GenericIPAddressField': 'CharField',
+            'PositiveBigIntegerField': 'BigIntegerField',
+            'PositiveIntegerField': 'IntegerField',
+            'PositiveSmallIntegerField': 'SmallIntegerField',
         }
