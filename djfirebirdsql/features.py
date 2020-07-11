@@ -1,5 +1,6 @@
 from django.db.backends.base.features import BaseDatabaseFeatures
 from django.db.utils import InterfaceError
+from django.utils.functional import cached_property
 
 
 class DatabaseFeatures(BaseDatabaseFeatures):
@@ -37,3 +38,11 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_forward_references = False
     connection_persists_old_columns = True
     supports_json_field = False
+
+    @cached_property
+    def introspected_field_types(self):
+        return {
+            **super().introspected_field_types,
+            'DurationField': 'BigIntegerField',
+            'GenericIPAddressField': 'CharField',
+        }
