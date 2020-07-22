@@ -422,9 +422,9 @@ class DatabaseOperations(BaseDatabaseOperations):
         sql, timedelta = sub_expressions
         if isinstance(sql, str) and isinstance(timedelta, str):
             if connector == '-':
-                return 'DATEADD(MILLISECOND, -%s/1000, CAST(%s AS TIMESTAMP))' % (timedelta, sql)
+                return 'DATEADD(MILLISECOND, -(%s)/1000, CAST(%s AS TIMESTAMP))' % (timedelta, sql)
             else:
-                return 'DATEADD(MILLISECOND, %s/1000, CAST(%s AS TIMESTAMP))' % (timedelta, sql)
+                return 'DATEADD(MILLISECOND, (%s)/1000, CAST(%s AS TIMESTAMP))' % (timedelta, sql)
 
         if isinstance(sql, datetime.timedelta):
             sql, timedelta = timedelta, sql
