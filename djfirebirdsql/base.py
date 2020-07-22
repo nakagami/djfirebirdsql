@@ -62,7 +62,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         'SmallIntegerField': 'smallint',
         'TextField': 'blob sub_type 1',
         'TimeField': 'time',
-        'UUIDField': 'char(36)',
+        'UUIDField': 'char(32)',
     }
 
     _limited_data_types = ('blob sub_type 1',)
