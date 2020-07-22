@@ -426,9 +426,6 @@ class DatabaseOperations(BaseDatabaseOperations):
             else:
                 return 'DATEADD(MILLISECOND, (%s)/1000, CAST(%s AS TIMESTAMP))' % (timedelta, sql)
 
-        if isinstance(sql, datetime.timedelta):
-            sql, timedelta = timedelta, sql
-
         if isinstance(timedelta, str):
             return 'DATEADD(MILLISECOND, %s%s/1000, %s)' % (connector, timedelta, sql)
         elif timedelta.days:
