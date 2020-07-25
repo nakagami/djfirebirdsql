@@ -6,12 +6,6 @@ class DatabaseCreation(BaseDatabaseCreation):
     def _get_test_db_name(self):
         return self.connection.settings_dict['NAME']
 
-    def _check_active_connection(self, verbosity):
-        if self.connection:
-            if verbosity >= 1:
-                print("Closing active connection")
-            self.connection.close()
-
     def _get_connection_params(self, **overrides):
         settings_dict = self.connection.settings_dict
         conn_params = {'charset': 'UTF8'}
@@ -68,10 +62,4 @@ class DatabaseCreation(BaseDatabaseCreation):
         return test_database_name
 
     def _destroy_test_db(self, test_database_name, verbosity):
-        """
-        Internal implementation - remove the test db tables.
-        """
-        self._check_active_connection(verbosity)
-        connection = Database.connect(**self._get_connection_params(database=test_database_name))
-        connection.drop_database()
-        connection.close()
+        pass
