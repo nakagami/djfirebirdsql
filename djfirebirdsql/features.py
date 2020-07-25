@@ -11,6 +11,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_transactions = True
     can_introspect_small_integer_field = True
     closed_cursor_error_class = InterfaceError
+    requires_literal_defaults = True
     has_case_insensitive_like = False
     implied_column_null = True
     ignores_table_name_case = True
@@ -38,6 +39,8 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_forward_references = False
     connection_persists_old_columns = True
     supports_json_field = False
+    supports_partially_nullable_unique_constraints = False
+    supports_mixed_date_datetime_comparisons = False
 
     @cached_property
     def introspected_field_types(self):
