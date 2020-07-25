@@ -36,6 +36,12 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
             indexes = self.connection.introspection._get_field_indexes(cursor, model._meta.db_table, field.column)
         return indexes
 
+    def remove_field(self, model, field):
+        for index_name in self._get_field_indexes(model, field):
+            sql = self._delete_constraint_sql(self.sql_delete_index, model, index_name)
+            self.execute(sql)
+        super(DatabaseSchemaEditor, self).remove_field(model, field)
+
     def _alter_column_type_sql(self, model, old_field, new_field, new_type):
         if new_field.get_internal_type() == 'AutoField':
             new_type = 'integer'
