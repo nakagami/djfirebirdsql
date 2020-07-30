@@ -9,7 +9,9 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_regex_backreferencing = False
     can_return_columns_from_insert = True
     supports_transactions = True
+    can_introspect_autofield = True
     can_introspect_small_integer_field = True
+    can_introspect_duration_field = False
     closed_cursor_error_class = InterfaceError
     requires_literal_defaults = True
     has_case_insensitive_like = False
@@ -21,7 +23,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_subqueries_in_group_by = False
     supports_partially_nullable_unique_constraints = False
     supports_mixed_date_datetime_comparisons = False
-    can_introspect_autofield = True
     supports_over_clause = True
     has_bulk_insert = False
     supports_timezones = False
@@ -41,14 +42,3 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_json_field = False
     supports_partially_nullable_unique_constraints = False
     supports_mixed_date_datetime_comparisons = False
-
-    @cached_property
-    def introspected_field_types(self):
-        return {
-            **super().introspected_field_types,
-            'DurationField': 'BigIntegerField',
-            'GenericIPAddressField': 'CharField',
-            'PositiveBigIntegerField': 'BigIntegerField',
-            'PositiveIntegerField': 'IntegerField',
-            'PositiveSmallIntegerField': 'SmallIntegerField',
-        }
