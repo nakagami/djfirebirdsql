@@ -1,6 +1,5 @@
 from django.db.backends.base.features import BaseDatabaseFeatures
 from django.db.utils import InterfaceError
-from django.utils.functional import cached_property
 
 
 class DatabaseFeatures(BaseDatabaseFeatures):
@@ -21,7 +20,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     bare_select_suffix = " FROM RDB$DATABASE"
     supports_sequence_reset = False
     supports_subqueries_in_group_by = False
-    supports_partially_nullable_unique_constraints = False
     supports_mixed_date_datetime_comparisons = False
     supports_over_clause = True
     has_bulk_insert = False
@@ -40,5 +38,4 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_forward_references = False
     connection_persists_old_columns = True
     supports_json_field = False
-    supports_partially_nullable_unique_constraints = False
     supports_mixed_date_datetime_comparisons = False
