@@ -257,7 +257,7 @@ class DatabaseOperations(BaseDatabaseOperations):
     def quote_name(self, name):
         if not name.startswith('"') and not name.endswith('"'):
             name = '"%s"' % truncate_name(name, self.max_name_length())
-        return name.upper()
+        return name.replace(' ', '_').upper()
 
     def sql_flush(self, style, tables, *, reset_sequences=False, allow_cascade=False):
         if tables:
