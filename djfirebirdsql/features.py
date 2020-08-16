@@ -23,7 +23,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_mixed_date_datetime_comparisons = False
     supports_over_clause = True
     has_bulk_insert = False
-    supports_timezones = False
+    supports_timezones = True
     has_zoneinfo_database = False
     supports_select_intersection = False
     supports_select_difference = False
