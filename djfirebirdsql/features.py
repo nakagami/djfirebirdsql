@@ -8,9 +8,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_regex_backreferencing = False
     can_return_columns_from_insert = True
     supports_transactions = True
-    can_introspect_autofield = True
-    can_introspect_small_integer_field = True
-    can_introspect_duration_field = False
     closed_cursor_error_class = InterfaceError
     requires_literal_defaults = True
     has_case_insensitive_like = False
