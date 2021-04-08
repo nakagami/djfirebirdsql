@@ -5,7 +5,6 @@ from django.db.backends.base.introspection import (
     BaseDatabaseIntrospection, FieldInfo, TableInfo,
 )
 
-FieldInfo = namedtuple('FieldInfo', FieldInfo._fields + ('identity_type',))
 InfoLine = namedtuple('InfoLine', 'col_name data_type max_len num_prec num_scale extra column_default identity_type')
 
 
@@ -105,9 +104,11 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
               , f.rdb$field_scale * -1
               , rf.rdb$null_flag
               , rf.rdb$default_source
-              , rf.rdb$identity_type
+              , c.rdb$collation_name
             from
-              rdb$relation_fields rf join rdb$fields f on (rf.rdb$field_source = f.rdb$field_name)
+              rdb$relation_fields rf
+                join rdb$fields f on (rf.rdb$field_source = f.rdb$field_name)
+                join rdb$collations c on (rf.rdb$collation_id = c.rdb$collation_id)
             where
               rf.rdb$relation_name = '%s'
             order by
@@ -115,7 +116,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             """ % (table_name.strip().upper(),))
         items = []
         for r in cursor.fetchall():
-            # name type_code display_size internal_size precision scale null_ok, default, identity_type
+            # name type_code display_size internal_size precision scale null_ok, default, collation
             items.append(FieldInfo(self.identifier_converter(r[0]), r[1], r[2], r[2] or 0, r[3], r[4], not (r[5] == 1), r[6], r[7]))
         return items
 

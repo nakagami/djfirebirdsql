@@ -46,3 +46,13 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             'DurationField': 'BigIntegerField',
             'GenericIPAddressField': 'CharField',
         }
+
+    @cached_property
+    def django_test_skips(self):
+        skips = {
+            "Skip on FirebirdSQL": {
+                'admin_docs.test_middleware.XViewMiddlewareTest',
+                'admin_docs.test_views.AdminDocViewTests',
+            }
+        }
+        return skips
